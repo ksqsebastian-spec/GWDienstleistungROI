@@ -39,6 +39,51 @@ export interface MonthlyROI {
   roi_pa_pct: number;
 }
 
+export interface Upload {
+  id: string;
+  filename: string;
+  rows_imported: number;
+  rows_skipped: number;
+  column_mapping: Record<string, string> | null;
+  created_at: string;
+}
+
+// The DB columns that can be mapped from an import file
+export const IMPORTABLE_FIELDS = [
+  { key: "jahr", label: "Jahr", type: "number" },
+  { key: "monat", label: "Monat", type: "text" },
+  { key: "kundenname", label: "Kundenname", type: "text" },
+  { key: "objektadresse", label: "Objektadresse", type: "text" },
+  { key: "taetigkeit", label: "Tätigkeit", type: "text" },
+  { key: "herkunft", label: "Herkunft", type: "text" },
+  { key: "netto_umsatz", label: "Netto-Umsatz", type: "number" },
+  { key: "rohertrag", label: "Rohertrag", type: "number" },
+  { key: "angebot", label: "Angebot", type: "text" },
+  { key: "datum", label: "Datum", type: "date" },
+] as const;
+
+// Auto-mapping: known xlsx header → DB column
+export const AUTO_COLUMN_MAP: Record<string, string> = {
+  "jahr": "jahr",
+  "monat": "monat",
+  "kundenname": "kundenname",
+  "objektadresse": "objektadresse",
+  "tätigkeit": "taetigkeit",
+  "tatigkeit": "taetigkeit",
+  "taetigkeit": "taetigkeit",
+  "herkunft": "herkunft",
+  "netto-umsatz": "netto_umsatz",
+  "nettoumsatz": "netto_umsatz",
+  "netto_umsatz": "netto_umsatz",
+  "umsatz": "netto_umsatz",
+  "rohertrag": "rohertrag",
+  "angebot": "angebot",
+  "datum": "datum",
+  "datum (hilfe):": "datum",
+  "datum (hilfe)": "datum",
+  "date": "datum",
+};
+
 export const MONATE = [
   "Januar", "Februar", "März", "April", "Mai", "Juni",
   "Juli", "August", "September", "Oktober", "November", "Dezember"
