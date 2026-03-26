@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import * as XLSX from "xlsx";
 import { supabase } from "@/lib/supabase";
-import { IMPORTABLE_FIELDS, AUTO_COLUMN_MAP, MONATE } from "@/lib/types";
+import { IMPORTABLE_FIELDS, XLSX_COLUMN_MAP, MONATE } from "@/lib/types";
 import { formatCurrency } from "@/lib/calculations";
 
 interface FileImportProps {
@@ -25,9 +25,9 @@ type ColumnMapping = Record<string, string>; // fileHeader → dbField
 function autoMapColumns(headers: string[]): ColumnMapping {
   const mapping: ColumnMapping = {};
   for (const header of headers) {
-    const normalized = header.toLowerCase().trim();
-    if (AUTO_COLUMN_MAP[normalized]) {
-      mapping[header] = AUTO_COLUMN_MAP[normalized];
+    // Exact match against the known xlsx format first
+    if (XLSX_COLUMN_MAP[header]) {
+      mapping[header] = XLSX_COLUMN_MAP[header];
     }
   }
   return mapping;

@@ -62,26 +62,19 @@ export const IMPORTABLE_FIELDS = [
   { key: "datum", label: "Datum", type: "date" },
 ] as const;
 
-// Auto-mapping: known xlsx header → DB column
-export const AUTO_COLUMN_MAP: Record<string, string> = {
-  "jahr": "jahr",
-  "monat": "monat",
-  "kundenname": "kundenname",
-  "objektadresse": "objektadresse",
-  "tätigkeit": "taetigkeit",
-  "tatigkeit": "taetigkeit",
-  "taetigkeit": "taetigkeit",
-  "herkunft": "herkunft",
-  "netto-umsatz": "netto_umsatz",
-  "nettoumsatz": "netto_umsatz",
-  "netto_umsatz": "netto_umsatz",
-  "umsatz": "netto_umsatz",
-  "rohertrag": "rohertrag",
-  "angebot": "angebot",
-  "datum": "datum",
-  "datum (hilfe):": "datum",
-  "datum (hilfe)": "datum",
-  "date": "datum",
+// Exact column mapping from Google-Ads Projekt_250326.xlsx → DB fields
+// Headers in the xlsx: Jahr | Monat | Kundenname | Objektadresse | Tätigkeit | Herkunft | Netto-Umsatz | Rohertrag | Angebot | (empty) | (empty) | (empty) | Datum (Hilfe):
+export const XLSX_COLUMN_MAP: Record<string, string> = {
+  "Jahr": "jahr",
+  "Monat": "monat",
+  "Kundenname": "kundenname",
+  "Objektadresse": "objektadresse",
+  "Tätigkeit": "taetigkeit",
+  "Herkunft": "herkunft",
+  "Netto-Umsatz": "netto_umsatz",
+  "Rohertrag": "rohertrag",
+  "Angebot": "angebot",
+  "Datum (Hilfe):": "datum",
 };
 
 export const MONATE = [
