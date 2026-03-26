@@ -9,6 +9,7 @@ import {
   formatCurrency,
   formatPercent,
 } from "@/lib/calculations";
+import Tooltip from "@/components/Tooltip";
 
 function ConfigField({
   label,
@@ -94,7 +95,9 @@ export default function ROIPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-text">ROI-Rechnung</h2>
+        <h2 className="text-xl font-semibold text-text">
+          <Tooltip text="Return on Investment — wie viel Gewinn die Investition in Google Ads und Homepage bisher zurückgebracht hat.">ROI</Tooltip>-Rechnung
+        </h2>
         <p className="text-sm text-text-muted mt-1">
           Google Ads & Homepage — automatisch berechnet
         </p>
@@ -104,7 +107,8 @@ export default function ROIPage() {
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-surface border border-border rounded-xl p-6">
           <h3 className="text-xs font-mono uppercase tracking-wider text-text-dim mb-4">
-            Einmalige Investitionen
+
+            <Tooltip text="Kosten die nur einmal anfallen — Homepage-Erstellung und Google Ads Kampagnen-Setup.">Einmalige Investitionen</Tooltip>
           </h3>
           <div className="space-y-4">
             <ConfigField
@@ -132,7 +136,8 @@ export default function ROIPage() {
 
         <div className="bg-surface border border-border rounded-xl p-6">
           <h3 className="text-xs font-mono uppercase tracking-wider text-text-dim mb-4">
-            Laufende Kosten (monatlich)
+
+            <Tooltip text="Kosten die jeden Monat anfallen — Ads-Verwaltung und laufendes Werbebudget.">Laufende Kosten</Tooltip> (monatlich)
           </h3>
           <div className="space-y-4">
             <ConfigField
@@ -142,7 +147,7 @@ export default function ROIPage() {
               onChange={(v) => updateConfig("pflegekosten_monat", v)}
             />
             <ConfigField
-              label="Operative Marge"
+              label="Operative Marge (%)"
               value={config.operative_marge_pct * 100}
               suffix="%"
               onChange={(v) => updateConfig("operative_marge_pct", v / 100)}
@@ -166,24 +171,24 @@ export default function ROIPage() {
             <thead>
               <tr className="border-b border-border bg-surface-2">
                 {[
-                  "Monat",
-                  "Ads Ausg.",
-                  "Pflege",
-                  "Kosten Ges.",
-                  "Netto-Umsatz",
-                  "Rohertrag",
-                  "Op. Marge",
-                  "Ergebnis",
-                  "Kum. Kosten",
-                  "Kum. Marge",
-                  "Kum. Ergebnis",
-                  "ROI %",
+                  { label: "Monat", tip: "" },
+                  { label: "Ads Ausg.", tip: "Monatliche Google Ads Werbeausgaben — das tatsächlich ausgegebene Klickbudget." },
+                  { label: "Pflege", tip: "Monatliche Verwaltungsgebühr für die Betreuung der Google Ads Kampagnen." },
+                  { label: "Kosten Ges.", tip: "Ads-Ausgaben + Pflegekosten zusammen für den Monat." },
+                  { label: "Netto-Umsatz", tip: "Summe aller Rechnungsbeträge ohne MwSt. in diesem Monat." },
+                  { label: "Rohertrag", tip: "Umsatz minus direkte Kosten (Material, Fremdleistungen)." },
+                  { label: "Op. Marge", tip: "Operative Marge — der Anteil vom Rohertrag der als Gewinn bleibt (nach Gemeinkosten)." },
+                  { label: "Ergebnis", tip: "Operative Marge minus laufende Kosten — der echte Monatsgewinn aus der Werbung." },
+                  { label: "Kum. Kosten", tip: "Kumulierte Kosten — alle bisherigen Ausgaben aufsummiert (inkl. Anfangsinvestition)." },
+                  { label: "Kum. Marge", tip: "Kumulierte operative Marge — gesamter bisheriger Gewinn aufsummiert." },
+                  { label: "Kum. Ergebnis", tip: "Kumuliertes Ergebnis — Gesamtgewinn minus Gesamtkosten. Positiv = im Plus." },
+                  { label: "ROI %", tip: "Return on Investment — Verhältnis von Gewinn zu Gesamtkosten in Prozent. 100% = doppelt zurück." },
                 ].map((h) => (
                   <th
-                    key={h}
+                    key={h.label}
                     className="px-3 py-3 text-[10px] font-mono uppercase tracking-wider text-text-dim font-medium text-right first:text-left"
                   >
-                    {h}
+                    {h.tip ? <Tooltip text={h.tip}>{h.label}</Tooltip> : h.label}
                   </th>
                 ))}
               </tr>
@@ -272,21 +277,21 @@ export default function ROIPage() {
 
       {/* Break-Even Analysis */}
       <div className="bg-surface border border-border rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-text mb-6">Break-Even Analyse</h3>
+        <h3 className="text-sm font-semibold text-text mb-6"><Tooltip text="Der Punkt, ab dem die Einnahmen die gesamten Investitionskosten decken — ab hier ist das Projekt profitabel.">Break-Even</Tooltip> Analyse</h3>
         <div className="grid grid-cols-3 gap-8">
           <div>
             <h4 className="text-[10px] font-mono uppercase tracking-wider text-text-dim mb-3">
-              1. Operativer Ertrag / Auftrag
+              1. <Tooltip text="Der Gewinn pro Auftrag nach Abzug der direkten Kosten (Material, Arbeitszeit).">Operativer Ertrag</Tooltip> / Auftrag
             </h4>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-text-muted">Ø Netto-Umsatz / Auftrag</span>
+                <span className="text-text-muted"><Tooltip text="Durchschnittlicher Rechnungsbetrag pro Auftrag ohne Mehrwertsteuer.">Ø Netto-Umsatz</Tooltip> / Auftrag</span>
                 <span className="font-mono">
                   {formatCurrency(breakEven.avgUmsatzProAuftrag)}
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-text-muted">Operative Marge</span>
+                <span className="text-text-muted"><Tooltip text="Anteil des Rohertrags der als tatsächlicher Gewinn übrig bleibt — nach Gemeinkosten wie Miete, Versicherung, Verwaltung.">Operative Marge</Tooltip></span>
                 <span className="font-mono">
                   {(breakEven.operativeMargePct * 100).toFixed(0)}%
                 </span>
@@ -334,7 +339,7 @@ export default function ROIPage() {
 
           <div>
             <h4 className="text-[10px] font-mono uppercase tracking-wider text-text-dim mb-3">
-              3. Überdeckung & Break-Even
+              3. <Tooltip text="Monatlicher Überschuss nach Abzug aller laufenden Kosten — wird zum Abbau der Anfangsinvestition genutzt.">Überdeckung</Tooltip> & Break-Even
             </h4>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">

@@ -2,6 +2,7 @@
 
 import { Job } from "@/lib/types";
 import { formatCurrency } from "@/lib/calculations";
+import Tooltip from "@/components/Tooltip";
 
 interface SummaryBarProps {
   jobs: Job[];
@@ -26,24 +27,28 @@ export default function SummaryBar({ jobs }: SummaryBarProps) {
   const stats = [
     {
       label: `Netto-Umsatz (${label})`,
+      tooltip: "Gesamter Rechnungsbetrag ohne Mehrwertsteuer.",
       value: formatCurrency(totalUmsatz),
       color: "text-accent",
       bar: "bg-accent",
     },
     {
       label: `Rohertrag (${label})`,
+      tooltip: "Umsatz abzüglich direkter Kosten (Material, Fremdleistungen). Noch vor Gemeinkosten wie Miete oder Gehälter.",
       value: formatCurrency(totalRohertrag),
       color: "text-blue",
       bar: "bg-blue",
     },
     {
       label: "Aufträge",
+      tooltip: "Anzahl der erfassten Aufträge im ausgewählten Zeitraum.",
       value: String(relevantJobs.length),
       color: "text-text",
       bar: "bg-text",
     },
     {
       label: "Unvollständig",
+      tooltip: "Aufträge bei denen Netto-Umsatz oder Rohertrag noch fehlt (als ??? markiert).",
       value: String(incomplete),
       color: incomplete > 0 ? "text-amber" : "text-accent",
       bar: incomplete > 0 ? "bg-amber" : "bg-accent",
@@ -59,7 +64,7 @@ export default function SummaryBar({ jobs }: SummaryBarProps) {
         >
           <div className={`absolute top-0 left-0 right-0 h-[3px] ${s.bar}`} />
           <p className="text-[10px] font-mono uppercase tracking-wider text-text-dim mb-1">
-            {s.label}
+            <Tooltip text={s.tooltip}>{s.label}</Tooltip>
           </p>
           <p className={`text-2xl font-semibold ${s.color}`}>{s.value}</p>
         </div>

@@ -18,8 +18,8 @@
   --color-blue-light: #E3EFF6;
   --color-amber: #B5651D;
   --color-amber-light: #FFF3E0;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", "SF Mono", "Fira Code", monospace;
 }
 
 body {
