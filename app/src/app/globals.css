@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #FAFAF8;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F5F4F1;
+  --color-surface-3: #ECEAE5;
+  --color-border: #E2DFD9;
+  --color-border-hover: #D4D0C8;
+  --color-text: #1A1916;
+  --color-text-muted: #6B6860;
+  --color-text-dim: #9B9790;
+  --color-accent: #2D6A4F;
+  --color-accent-light: #D8F3DC;
+  --color-red: #C1440E;
+  --color-red-light: #FDECE5;
+  --color-blue: #1B4965;
+  --color-blue-light: #E3EFF6;
+  --color-amber: #B5651D;
+  --color-amber-light: #FFF3E0;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", monospace;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Editable cell styles */
+.cell-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+  padding: 2px 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.cell-input:focus {
+  background: var(--color-accent-light);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: -2px -6px;
+}
+
+.cell-input-number {
+  font-family: var(--font-mono);
+  text-align: right;
+}
+
+.cell-missing {
+  background: var(--color-amber-light);
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-dim); }
+
+/* Table */
+table { border-collapse: collapse; }
+th { text-align: left; }
