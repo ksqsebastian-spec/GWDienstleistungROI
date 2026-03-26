@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das Flywheel — Profit-Reinvestment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--bg:#FAFAF8;--sf:#FFF;--s2:#F5F4F1;--s3:#ECEAE5;--bd:#E2DFD9;--bh:#D4D0C8;--tx:#1A1916;--tm:#6B6860;--td:#9B9790;
+--ac:#2D6A4F;--al:#D8F3DC;--cr:#C1440E;--crl:#FDECE5;--bl:#1B4965;--bll:#E3EFF6;--pu:#5A189A;--pl:#F0E6FA;--am:#B5651D;--aml:#FFF3E0;--tl:#0B6E4F;--tll:#E0F5ED;--pk:#9B2335;--pkl:#FCE8EC;--ind:#3730A3;--inl:#E8E7F8;
+--r:12px;--rs:8px;--fd:'Instrument Serif',Georgia,serif;--fb:'DM Sans',-apple-system,sans-serif;--fm:'DM Mono','SF Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}html{font-size:16px;-webkit-font-smoothing:antialiased}body{background:var(--bg);color:var(--tx);font-family:var(--fb)}
+.w{max-width:1200px;margin:0 auto;padding:48px 32px 80px}
+.nav{display:flex;gap:4px;background:var(--sf);border:1px solid var(--bd);border-radius:100px;padding:4px;margin-bottom:40px;width:fit-content}
+.nb{font-family:var(--fm);font-size:12px;color:var(--tm);background:none;border:none;border-radius:100px;padding:10px 24px;cursor:pointer;transition:all .2s}.nb.on{background:var(--tx);color:#F0EEE9}.nb:hover:not(.on){background:var(--s2)}
+.page{display:none}.page.on{display:block}
+.sh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.sh h2{font-family:var(--fd);font-size:24px;font-weight:400}
+.bdg{font-family:var(--fm);font-size:11px;color:var(--tm);padding:4px 12px;background:var(--s2);border-radius:100px;border:1px solid var(--bd)}
+.bdg .wr{color:var(--cr);font-weight:500}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;background:var(--s3);border-radius:2px;outline:none;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;cursor:grab;border:2px solid var(--sf);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;cursor:grab;border:2px solid var(--sf)}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.an{animation:fi .4s ease forwards;opacity:0}
+.tag{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ac);background:var(--al);padding:5px 14px;border-radius:100px;display:inline-block;margin-bottom:16px}
+header h1{font-family:var(--fd);font-size:clamp(32px,5vw,52px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:12px}
+header h1 em{font-style:italic;color:var(--ac)}
+header p{font-size:15px;color:var(--tm);max-width:600px;line-height:1.6}
+.er{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.eb{font-family:var(--fm);font-size:11px;color:var(--tm);background:var(--sf);border:1px solid var(--bd);border-radius:100px;padding:8px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.eb:hover{border-color:var(--ac);color:var(--ac)}.eb svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+/* ENGINE */
+.eng{background:var(--sf);border:2px solid var(--ac);border-radius:var(--r);padding:24px 28px;margin-bottom:24px;cursor:pointer;transition:box-shadow .2s;position:relative;overflow:hidden}
+.eng:hover{box-shadow:0 4px 20px rgba(45,106,79,.1)}
+.eng::before{content:'#1';position:absolute;top:8px;right:16px;font-family:var(--fd);font-size:72px;color:var(--ac);opacity:.06}
+.eng .et{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ac);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.eng .et::before{content:'';width:16px;height:2px;background:var(--ac)}
+.eng h3{font-family:var(--fd);font-size:24px;font-weight:400;margin-bottom:4px}
+.eng .ed{font-size:13px;color:var(--tm);line-height:1.6}
+/* CONTROLS */
+.cts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.ct{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:22px 26px}
+.ct label{display:block;font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--td);margin-bottom:8px}
+.br{display:flex;align-items:baseline;gap:4px;margin-bottom:10px}
+.br .sy{font-family:var(--fd);font-size:36px;color:var(--td)}
+.br .pv{font-family:var(--fd);font-size:36px;color:var(--cr)}
+input.bn{font-family:var(--fd);font-size:36px;color:var(--ac);background:none;border:none;outline:none;width:160px;border-bottom:2px solid var(--s3);transition:border-color .2s;-moz-appearance:textfield}
+input.bn:focus{border-color:var(--ac)}input.bn::-webkit-outer-spin-button,input.bn::-webkit-inner-spin-button{-webkit-appearance:none}
+.ct .ht{font-size:11px;color:var(--td);font-family:var(--fm)}
+.ct input[type="range"]::-webkit-slider-thumb{background:var(--cr)}.ct input[type="range"]::-moz-range-thumb{background:var(--cr)}
+/* SUMMARY */
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px 20px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sc.s1::before{background:var(--cr)}.sc.s2::before{background:var(--ac)}.sc.s3::before{background:var(--bl)}
+.sc .sl{font-size:10px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.08em;color:var(--td);margin-bottom:3px}
+.sc .sv{font-family:var(--fd);font-size:24px}.sc .ss{font-size:11px;font-family:var(--fm);color:var(--td);margin-top:2px}
+.sc.s1 .sv{color:var(--cr)}.sc.s2 .sv{color:var(--ac)}.sc.s3 .sv{color:var(--bl)}
+/* SPLIT */
+.sps{margin-bottom:28px}.spw{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:24px 28px}
+.spm{display:flex;height:44px;border-radius:8px;overflow:hidden;margin-bottom:6px}
+.spm .si{display:flex;transition:flex .3s;overflow:hidden}.spm .sg{transition:flex .3s;min-width:0}
+.spm .sk{background:var(--s3);display:flex;align-items:center;justify-content:center;transition:flex .3s;font-family:var(--fm);font-size:12px;color:var(--tm);font-weight:500}
+.spl{display:flex;justify-content:space-between;margin-bottom:20px}.spl span{font-family:var(--fm);font-size:11px;color:var(--td)}
+.spl .li{color:var(--cr);font-weight:500}.spl .lk{color:var(--ac);font-weight:500}
+.cbs{display:flex;flex-direction:column;gap:5px}
+.cbr{display:flex;align-items:center;gap:10px}
+.cbn{font-size:12px;min-width:170px;text-align:right;color:var(--tm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cbw{flex:1;height:22px;background:var(--s2);border-radius:4px;overflow:hidden}
+.cbb{height:100%;border-radius:4px;transition:width .3s;display:flex;align-items:center;padding-left:8px}
+.cbb span{font-family:var(--fm);font-size:10px;color:white;font-weight:500;white-space:nowrap}
+.cba{font-family:var(--fm);font-size:11px;font-weight:500;min-width:55px}
+/* TIERS & CARDS */
+.th{display:flex;align-items:center;gap:10px;margin:24px 0 12px}
+.tb{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 14px;border-radius:100px;font-weight:500}
+.t1 .tb{background:var(--al);color:var(--ac)}.t2 .tb{background:var(--aml);color:var(--am)}.t3 .tb{background:var(--pl);color:var(--pu)}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.cc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px;transition:all .2s;cursor:pointer;position:relative}
+.cc:hover{border-color:var(--bh);box-shadow:0 2px 10px rgba(0,0,0,.03);transform:translateY(-1px)}
+.cc .tp{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.cc .ic{width:32px;height:32px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center}
+.cc .ca{text-align:right}
+.car{display:flex;align-items:baseline;gap:2px;justify-content:flex-end}
+.cas{font-family:var(--fd);font-size:18px}.can{font-family:var(--fd);font-size:18px;background:none;border:none;outline:none;width:68px;text-align:right;border-bottom:1px solid transparent;transition:border-color .2s;-moz-appearance:textfield}
+.can:hover{border-color:var(--s3)}.can:focus{border-color:currentColor}
+.can::-webkit-outer-spin-button,.can::-webkit-inner-spin-button{-webkit-appearance:none}
+.cap{font-size:10px;font-family:var(--fm);color:var(--td);text-align:right}
+.cax{font-size:10px;font-family:var(--fm);text-align:right;font-weight:500}
+.cc .nm{font-size:13px;font-weight:600;margin-bottom:2px}
+.cc .ds{font-size:11px;color:var(--tm);line-height:1.5;margin-bottom:10px}
+.cc .lp{font-size:10px;font-family:var(--fm);color:var(--tm);padding:6px 10px;background:var(--s2);border-radius:6px;line-height:1.4;margin-bottom:12px;border-left:2px solid}
+.csr2{display:flex;align-items:center;gap:10px}.csr2 input[type="range"]{flex:1}
+.cpb2{font-family:var(--fm);font-size:12px;font-weight:500;min-width:36px;text-align:right}
+.cc .dh{position:absolute;top:8px;right:10px;font-family:var(--fm);font-size:9px;color:var(--td);text-transform:uppercase;letter-spacing:.06em;opacity:0;transition:opacity .2s}
+.cc:hover .dh{opacity:1}
+/* TOGGLE */
+.tgl-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+.tgl{position:relative;width:36px;height:20px;background:var(--s3);border-radius:10px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tgl.on{background:var(--ac)}.tgl::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tgl.on::after{transform:translateX(16px)}
+.tgl-label{font-family:var(--fm);font-size:11px;color:var(--tm)}
+/* FLYWHEEL */
+.fw{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:24px 28px;margin:24px 0}
+.fw h2{font-family:var(--fd);font-size:20px;font-weight:400;margin-bottom:4px}
+.fw .sub{font-size:12px;color:var(--tm);margin-bottom:16px}
+.fwl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fwi{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;background:var(--s2);border-radius:var(--rs);font-size:11px;line-height:1.5;color:var(--tm)}
+.fwi .la2{flex-shrink:0;margin-top:1px}.fwi strong{color:var(--tx);font-weight:500}
+/* DETAIL */
+.db{font-family:var(--fm);font-size:12px;color:var(--tm);cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;background:none;border:none;transition:color .2s}
+.db:hover{color:var(--ac)}.db svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.dh2{margin-bottom:28px}.dh2 .di{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.dh2 h1{font-family:var(--fd);font-size:clamp(24px,3.5vw,36px);font-weight:400;margin-bottom:8px}
+.dh2 .dtg{font-size:14px;color:var(--tm);line-height:1.6;max-width:600px}
+.ris{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.ric{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px 20px;text-align:center}
+.ric .rv{font-family:var(--fd);font-size:26px;margin-bottom:2px}.ric .rl{font-size:10px;font-family:var(--fm);color:var(--td);text-transform:uppercase}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.dc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:20px 24px}
+.dc h3{font-family:var(--fd);font-size:16px;font-weight:400;margin-bottom:8px}
+.dc p,.dc li{font-size:12px;color:var(--tm);line-height:1.7}
+.dc ul{list-style:none;padding:0}.dc ul li{padding:4px 0;border-bottom:1px solid var(--s3);display:flex;gap:8px}
+.dc ul li:last-child{border-bottom:none}.dc ul li .ll{color:var(--td);min-width:100px;font-family:var(--fm);font-size:10px;flex-shrink:0}
+.wfs{margin-bottom:28px}.wfs h2{font-family:var(--fd);font-size:18px;font-weight:400;margin-bottom:14px}
+.wst{display:flex;gap:14px;padding:14px 0}.wsn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:12px;font-weight:500;flex-shrink:0}
+.wsc h4{font-size:13px;font-weight:600;margin-bottom:2px}.wsc p{font-size:11px;color:var(--tm);line-height:1.5}
+.wsc .wm{display:flex;gap:12px;margin-top:4px}.wsc .wm span{font-family:var(--fm);font-size:10px;color:var(--td)}
+/* BP */
+.bpp{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding:16px 22px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r)}
+.bpp .bpw{flex:1;height:8px;background:var(--s3);border-radius:4px;overflow:hidden}.bpp .bpb{height:100%;background:var(--ac);border-radius:4px;transition:width .3s}
+.bpp .bpc{font-family:var(--fm);font-size:14px;font-weight:500;color:var(--ac);min-width:50px;text-align:right}
+.bpcat{margin-bottom:24px}.bpcat h3{font-family:var(--fd);font-size:17px;font-weight:400;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.bpis{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.bpi{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--s3);transition:background .15s;cursor:pointer}
+.bpi:last-child{border-bottom:none}.bpi:hover{background:var(--s2)}.bpi.ck{background:var(--al)}
+.bpx{width:20px;height:20px;border:2px solid var(--bd);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.bpi.ck .bpx{background:var(--ac);border-color:var(--ac)}
+.bpx svg{width:12px;height:12px;stroke:white;stroke-width:2.5;fill:none;opacity:0;transition:opacity .15s}.bpi.ck .bpx svg{opacity:1}
+.bpt .bt{font-size:13px;font-weight:500;margin-bottom:1px}.bpt .bds{font-size:11px;color:var(--tm);line-height:1.4}
+.bpi.ck .bt{text-decoration:line-through;color:var(--td)}
+@media(max-width:900px){.cts{grid-template-columns:1fr}}
+@media(max-width:768px){.w{padding:24px 16px 60px}.sr,.ris{grid-template-columns:1fr}.cg,.dg,.fwl{grid-template-columns:1fr}.cbn{min-width:100px}}
+</style>
+</head>
+<body>
+<div class="w">
+<nav class="nav"><button class="nb on" onclick="sp('dash',this)">Dashboard</button><button class="nb" onclick="sp('bp',this)">Best Practice</button></nav>
+
+<div class="page on" id="p-dash">
+<div id="dv">
+<header class="an" style="animation-delay:.05s"><div class="tag">Profit-gestütztes Marketing</div><h1>Das <em>Flywheel</em></h1><p>Gewinn aus Werbekunden wird anteilig in Kanäle reinvestiert, die den Gesamtertrag steigern.</p></header>
+<div class="er an" style="animation-delay:.08s">
+<button class="eb" onclick="xPNG()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>PNG</button>
+<button class="eb" onclick="xJ()"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Speichern</button>
+<button class="eb" onclick="document.getElementById('imp').click()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Laden</button>
+<input type="file" id="imp" accept=".json" style="display:none" onchange="mJ(this)">
+</div>
+<div class="eng an" style="animation-delay:.1s" onclick="sd('gads')"><div class="et">Maßnahme #1 — Der Motor</div><h3>Google Ads Budget</h3><div class="ed">Generiert Kunden. Alle Kanäle werden aus dem resultierenden Gewinn finanziert. Details →</div></div>
+<div class="cts an" style="animation-delay:.12s">
+<div class="ct"><label>Monatlicher Gewinn aus Werbekunden</label><div class="br"><span class="sy">€</span><input class="bn" type="number" id="pi" value="8000" min="0" step="100" oninput="up()"></div><div class="ht">Reingewinn nach allen Kosten — vom Kunden gemeldet</div></div>
+<div class="ct"><label>Reinvestitions-Anteil</label><div class="br"><span class="pv" id="mpd">26</span><span class="sy">%</span></div><input type="range" id="mp" min="5" max="70" step="1" value="26" oninput="sc(+this.value)"><div class="ht" style="margin-top:6px">Alle Kanäle proportional skalieren</div></div>
+</div>
+<div class="sr an" style="animation-delay:.14s">
+<div class="sc s1"><div class="sl">Reinvestiert</div><div class="sv" id="vr"></div><div class="ss" id="xr"></div></div>
+<div class="sc s2"><div class="sl">Kunde behält</div><div class="sv" id="vk"></div><div class="ss" id="xk"></div></div>
+<div class="sc s3"><div class="sl">Aktive Kanäle</div><div class="sv" id="va"></div><div class="ss">Schleifen</div></div>
+</div>
+<div class="sps an" style="animation-delay:.16s"><div class="sh"><h2>Gewinnverteilung</h2><div class="bdg" id="tbd"></div></div>
+<div class="spw"><div class="spm" id="spm"></div><div class="spl"><span class="li" id="sli"></span><span class="lk" id="slk"></span></div><div class="cbs" id="cbs"></div></div></div>
+<div id="tc" class="an" style="animation-delay:.2s"></div>
+<div class="fw an" style="animation-delay:.22s"><h2>Compound-Schleifen</h2><p class="sub">Jeder Kanal füttert die anderen</p><div class="fwl" id="fwl"></div></div>
+</div>
+<div id="dtv" style="display:none"><button class="db" onclick="hd()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Zurück</button><div id="dtc"></div></div>
+</div>
+
+<div class="page" id="p-bp">
+<div style="margin-bottom:28px"><div class="tag">Kostenlose Sofortmaßnahmen</div><h1 style="font-family:var(--fd);font-size:clamp(28px,4vw,40px);font-weight:400;margin-bottom:8px">Best Practice Checkliste</h1><p style="font-size:14px;color:var(--tm);line-height:1.6;max-width:550px">Maßnahmen die kein Budget brauchen.</p></div>
+<div class="bpp"><div class="bpw"><div class="bpb" id="bpb" style="width:0%"></div></div><span class="bpc" id="bpc">0/14</span></div>
+<div id="bpl"></div>
+</div>
+</div>
+
+<script>
+const IC={
+g:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+s:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+r:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+c:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+ls:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6M11 8v6"/></svg>',
+fl:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>',
+fz:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4a2 2 0 012 2v9a2 2 0 01-2 2H7"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+ak:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+bs:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>',
+rc:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>',
+hw:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+wa:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+in:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+ga:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+};
+
+let calendlyOn=true;
+const D=[
+// T1
+{id:'guarantee',nm:'Garantie-Fonds',ic:'g',p:5,co:'#2D6A4F',cl:'#D8F3DC',t:1,
+d:'Unwiderstehliche Garantie — Rückgabequote < 5%, Conversion +20–40%.',l:'Stärkere Garantie → weniger Risiko → mehr Abschlüsse',cp:'Hormozis #1 Conversion-Hebel.',
+dt:{tg:'Garantie so stark, dass Nichtkaufen dumm wäre.',ri:[{v:'20–40%',l:'Conversion+'},{v:'< 5%',l:'Rückgaben'},{v:'4–8×',l:'ROI'}],w:'Doppelte Geld-zurück-Garantie oder kostenlose 48h-Nachbesserung.',y:'Unter 5% Rückgaben, 20–40% mehr Conversions. Risiko beim Anbieter = Vertrauen.',c:[{l:'Rücklage',v:'3–5% Gewinn'},{l:'Anwalt',v:'€200–500'},{l:'Nutzung',v:'< 5%'}],s:[{t:'Formulieren',d:'Stärkste Garantie im Markt.',ti:'2 Std.',co:'€0'},{t:'Absichern',d:'AGB prüfen.',ti:'1 Wo.',co:'€200–500'},{t:'Integrieren',d:'Website, Ads, KV.',ti:'3 Std.',co:'€0'},{t:'Befüllen',d:'Monatliche Rücklage.',ti:'5 Min.',co:'Laufend'}]}},
+{id:'speed',nm:'Speed / VIP-Reaktion',ic:'s',p:5,co:'#C1440E',cl:'#FDECE5',t:1,
+d:'Sofort-Reaktion, Auto-SMS, Follow-up-Emails, Erinnerungen. 21× höhere Kontaktrate bei 5 Min.',l:'Schneller reagieren + automatisch nachfassen → höhere Close-Rate',cp:'78% kaufen beim Erstreagierer. Deckt Reaktion, Follow-up und Reminder ab.',
+dt:{tg:'Geschwindigkeit + Nachfassen in einem System.',ri:[{v:'21×',l:'Kontaktrate (5 Min.)'},{v:'78%',l:'Kaufen beim Ersten'},{v:'36:1',l:'Email-Automation ROI'}],w:'Komplettes Reaktions- und Nachfass-System: Instant-SMS bei neuem Lead, Auto-Anruf innerhalb 5 Min., Follow-up-Email nach Angebot, Termin-Erinnerungen per SMS, Reaktivierungs-Mails nach 6 Monaten.',y:'Speed-to-Lead ist der stärkste Conversion-Prädiktor. Kombiniert mit automatisierten Follow-ups und Erinnerungen entsteht ein geschlossener Kreislauf ohne manuelle Arbeit.',c:[{l:'CRM/Automation',v:'€50–200/Mo.'},{l:'SMS-Gateway',v:'€0,07/SMS'},{l:'Email-Tool',v:'€30–100/Mo.'},{l:'Calltracking',v:'€30–100/Mo.'}],s:[{t:'Lead-Notification',d:'Instant-Push/SMS bei neuem Lead.',ti:'2 Std.',co:'€0–50'},{t:'Auto-SMS + Skript',d:'"Rückruf in 5 Min." + Telefon-Skript.',ti:'2 Std.',co:'€50'},{t:'Email-Sequenzen',d:'Welcome, Follow-up, Reaktivierung.',ti:'4 Std.',co:'€30–100/Mo.'},{t:'Erinnerungen',d:'SMS 24h + 2h vor Termin.',ti:'1 Std.',co:'€0'}]}},
+{id:'reviews',nm:'Google Bewertungen',ic:'r',p:4,co:'#1B4965',cl:'#E3EFF6',t:1,rc:5,
+d:'€5/Bewertung — NFC-Karten, Follow-ups, Incentives. Senkt CPC messbar.',l:'Höhere Sterne → bessere CTR → niedrigerer CPC',cp:'Quality Score steigt, Klickpreise sinken.',
+dt:{tg:'4,7 vs. 4,2 Sterne = 25% höhere CTR.',ri:[{v:'25%',l:'CTR+'},{v:'€5',l:'Pro Review'},{v:'10–15%',l:'CPC-Reduktion'}],w:'€5 pro Review: NFC-Karten direkt zum Formular. Auto-Email 48h nach Auftrag.',y:'Seller Ratings = 17% höhere CTR. Jeder Zehntelpunkt über 4,5 wirkt auf CPC.',c:[{l:'NFC-Karten',v:'€80–150'},{l:'Follow-up',v:'€20–50/Mo.'},{l:'Incentive',v:'~€5/Stk.'}],s:[{t:'NFC bestellen',d:'Direkt-Link zum Formular.',ti:'1 Wo.',co:'€80–150'},{t:'Follow-up',d:'Auto-Email 48h nach Auftrag.',ti:'2 Std.',co:'€20–50'},{t:'Team briefen',d:'NFC bei Abschluss zeigen.',ti:'30 Min.',co:'€0'},{t:'Monitoren',d:'Wöchentlich beantworten.',ti:'30 Min./Wo.',co:'€0'}]}},
+{id:'booking',nm:'Terminbuchung (Calendly)',ic:'c',p:0,co:'#0B6E4F',cl:'#E0F5ED',t:1,fix:12,
+d:'€12/Monat fix — Erinnerungen rettet 15–30% verlorene Buchungen.',l:'Weniger No-Shows → mehr Umsatz/Lead',cp:'Jeder No-Show = verbranntes Budget.',
+dt:{tg:'Fixkosten. Erinnerungen retten 15–30% der Buchungen.',ri:[{v:'15–30%',l:'Weniger No-Shows'},{v:'€12',l:'Fix/Monat'},{v:'50–100×',l:'ROI'}],w:'Online-Buchung + Auto-Erinnerung Email 24h + SMS 2h.',y:'No-Show ohne Erinnerung: 15–25%. Mit SMS: unter 5%.',c:[{l:'Calendly',v:'€12/Mo.'},{l:'SMS',v:'€0,05/Stk.'},{l:'Jährlich',v:'€144'}],s:[{t:'Account',d:'Eventtypen anlegen.',ti:'1 Std.',co:'€12/Mo.'},{t:'Erinnerungen',d:'Email + SMS konfigurieren.',ti:'30 Min.',co:'€0'},{t:'Einbetten',d:'Widget auf Website.',ti:'1 Std.',co:'€0'},{t:'Sync',d:'Kalender verbinden.',ti:'30 Min.',co:'€0'}]}},
+// T2
+{id:'lsa',nm:'Google LSA',ic:'ls',p:3,co:'#1B4965',cl:'#E3EFF6',t:2,
+d:'Pay-per-Lead statt Pay-per-Click. Google-Garantie-Badge. €15–30/Lead.',l:'Qualifiziertere Leads → bessere Conversion',cp:'Nur zahlen wenn jemand anruft.',
+dt:{tg:'Nur zahlen wenn jemand tatsächlich anruft.',ri:[{v:'€15–30',l:'Pro Lead'},{v:'3–5×',l:'Bessere Qualität'},{v:'Badge',l:'Google-Garantie'}],w:'Google-verifiziertes Profil ganz oben. Grünes Häkchen = Vertrauen. Pay-per-Lead.',y:'Lead-Qualität deutlich höher als Search Ads. Kunde sieht Bewertungen + Garantie.',c:[{l:'Pro Lead',v:'€15–30'},{l:'Verifizierung',v:'Kostenlos'},{l:'Budget',v:'Wochenlimit'}],s:[{t:'Anmelden',d:'Google LSA Profil anlegen.',ti:'1 Std.',co:'€0'},{t:'Verifizierung',d:'Hintergrundcheck.',ti:'1–3 Wo.',co:'€0'},{t:'Budget',d:'Wöchentliches Limit setzen.',ti:'15 Min.',co:'Variabel'},{t:'Leads managen',d:'Eingehende Leads bewerten.',ti:'Laufend',co:'€0'}]}},
+{id:'flyer',nm:'Flyer & Sticker System',ic:'fl',p:2,co:'#B5651D',cl:'#FFF3E0',t:2,
+d:'Professionelle Werbematerialien mit QR-Code. Haptisch, bleibt liegen.',l:'Physische Präsenz → Markenbekanntheit → Anfragen',cp:'Flyer am Kühlschrank bleibt Monate.',
+dt:{tg:'Physisches Material das bleibt — digital wird weggescrollt.',ri:[{v:'€0,10–0,50',l:'Pro Flyer'},{v:'Monate',l:'Lebensdauer'},{v:'Haptisch',l:'Vorteil vs. Digital'}],w:'Professionell designte Flyer und Aufkleber mit CTA und QR-Code. Bei Aufträgen, in Geschäften, bei Partnern.',y:'Ein Flyer am Kühlschrank bleibt Monate sichtbar. Kostet fast nichts.',c:[{l:'Design',v:'€200–500'},{l:'Druck (500)',v:'€50–150'},{l:'Verteilung',v:'Im Alltag'}],s:[{t:'Design',d:'Layout mit CTA und QR.',ti:'3 Std.',co:'€200–500'},{t:'Druck',d:'500–1.000 Stück.',ti:'1 Wo.',co:'€50–150'},{t:'Verteilen',d:'Bei jedem Auftrag, an Partner.',ti:'Laufend',co:'€0'},{t:'Nachbestellen',d:'Bestand monitoren.',ti:'Bei Bedarf',co:'Laufend'}]}},
+// T3
+{id:'vehicle',nm:'Fahrzeugbeschriftung',ic:'fz',p:2,co:'#0B6E4F',cl:'#E0F5ED',t:3,
+d:'Einmalig €800–2.000, dann null laufende Kosten. 30k–70k Sichtkontakte/Tag.',l:'Passive Sichtbarkeit → Suchanfragen',cp:'Null laufende Kosten nach Setup.',
+dt:{tg:'30.000–70.000 Sichtkontakte pro Tag. Pro Fahrzeug.',ri:[{v:'€800–2k',l:'Einmalig'},{v:'€0',l:'Laufend'},{v:'70k',l:'Kontakte/Tag'}],w:'Professionelle Folierung: Name, Telefon, Website, QR-Code.',y:'Null laufende Kosten. ROI steigt jeden Monat.',c:[{l:'Folierung',v:'€800–2k'},{l:'Design',v:'€200–500'},{l:'Laufend',v:'€0'}],s:[{t:'Design',d:'Entwurf mit QR.',ti:'3 Std.',co:'€200–500'},{t:'Folierung',d:'Werkstatt beauftragen.',ti:'1–2 Tage',co:'€800–2k'},{t:'Tracking',d:'QR-Link einrichten.',ti:'30 Min.',co:'€0'}]}},
+{id:'workwear',nm:'Arbeitskleidung',ic:'ak',p:1,co:'#B5651D',cl:'#FFF3E0',t:3,
+d:'Gebrandete Shirts, Jacken, Helme. Jeder Mitarbeiter = laufende Werbetafel.',l:'Professioneller Auftritt → Vertrauen → Suchanfragen',cp:'€20–50/Stück, null laufend.',
+dt:{tg:'Jeder Mitarbeiter eine Werbetafel auf jeder Baustelle.',ri:[{v:'€20–50',l:'Pro Stück'},{v:'€0',l:'Laufend'},{v:'Täglich',l:'Kontakte'}],w:'Einheitliche Kleidung mit Logo, Name, Website.',y:'Nachbarn sehen das Team → "sieht professionell aus" → Google-Suche.',c:[{l:'Shirts',v:'€20–30'},{l:'Jacken',v:'€40–50'},{l:'Helme',v:'€5–10'}],s:[{t:'Design',d:'Logo-Platzierung.',ti:'1 Std.',co:'€0'},{t:'Bestellen',d:'Erstausstattung.',ti:'2 Wo.',co:'€200–500'},{t:'Nachbestellen',d:'Bei neuen Leuten.',ti:'Bei Bedarf',co:'Laufend'}]}},
+{id:'signs',nm:'Baustellenschilder',ic:'bs',p:1,co:'#1B4965',cl:'#E3EFF6',t:3,
+d:'"Hier arbeitet [Firma]" + QR-Code. €30–80, wiederverwendbar.',l:'Nachbarschafts-Sichtbarkeit → lokale Anfragen',cp:'Höchster Social Proof: sichtbare Aktivität.',
+dt:{tg:'Jede Baustelle wird zur Werbefläche.',ri:[{v:'€30–80',l:'Pro Schild'},{v:'Wiedervw.',l:'Nutzung'},{v:'Hyper-lokal',l:'Reichweite'}],w:'Professionelles Schild mit Name, Stadtteil, QR-Code, Telefon.',y:'Nachbarn sehen Arbeit + Schild. Stärkster lokaler Social Proof.',c:[{l:'Schild',v:'€30–80'},{l:'Design',v:'€100–200'},{l:'Aufstellung',v:'Im Auftrag'}],s:[{t:'Design',d:'Layout mit QR.',ti:'2 Std.',co:'€100–200'},{t:'Produktion',d:'5–10 Schilder.',ti:'1 Wo.',co:'€150–400'},{t:'Routine',d:'Bei jedem Auftrag.',ti:'5 Min.',co:'€0'}]}},
+{id:'recruit',nm:'Recruiting Flyer',ic:'rc',p:1,co:'#9B2335',cl:'#FCE8EC',t:3,
+d:'Mitarbeiter-Gewinnung aus dem Flywheel. Flyer + QR zur Karriereseite.',l:'Mehr Mitarbeiter → mehr Kapazität → mehr Umsatz',cp:'Recruiting über Portale kostet €500–3k/Stelle.',
+dt:{tg:'Wachstum braucht Mitarbeiter. Aus dem Profit finanzieren.',ri:[{v:'€0,10–0,50',l:'Pro Flyer'},{v:'Direkt',l:'Ansprache'},{v:'vs. €500–3k',l:'Jobportal-Kosten'}],w:'Flyer "Wir suchen [Beruf]" + QR zur Karriereseite. Auf Baustellen, in Baumärkten, bei Lieferanten.',y:'Jobportale kosten €500–3.000 pro Stelle. Flyer kosten fast nichts.',c:[{l:'Design',v:'€100–300'},{l:'Druck',v:'€50–100'},{l:'Verteilung',v:'Im Alltag'}],s:[{t:'Stellenprofil',d:'Was suchen wir?',ti:'1 Std.',co:'€0'},{t:'Design',d:'Ansprechend mit QR.',ti:'2 Std.',co:'€100–300'},{t:'Drucken',d:'500 Stück.',ti:'1 Wo.',co:'€50–100'},{t:'Verteilen',d:'Baustellen, Baumärkte.',ti:'Laufend',co:'€0'}]}},
+{id:'handwritten',nm:'Handgeschriebene Karten',ic:'hw',p:1,co:'#9B2335',cl:'#FCE8EC',t:3,
+d:'~€3/Karte via Pensaki. Absurder ROI durch Überraschungseffekt.',l:'Persönliche Geste → Bewertungen + Empfehlungen',cp:'Bewertungsrate 3–5× höher als Email.',
+dt:{tg:'Handgeschrieben = Pattern-Interrupt.',ri:[{v:'€3–5',l:'Pro Karte'},{v:'5–10×',l:'ROI'},{v:'40%+',l:'Bewertungsrate'}],w:'Automatisierte Karten via Pensaki. Dank + QR-Code für Bewertung.',y:'Physische Post wird gelesen. Bewertungsrate 3–5× höher.',c:[{l:'Service',v:'€3–5/Karte'},{l:'Porto',v:'Inkl.'},{l:'Setup',v:'€50'}],s:[{t:'Pensaki',d:'Account + Stil.',ti:'30 Min.',co:'€0'},{t:'Texte',d:'3–4 Varianten.',ti:'1 Std.',co:'€0'},{t:'CRM-Trigger',d:'Auftrag → Karte.',ti:'2 Std.',co:'€50'},{t:'QR',d:'Bewertungslink.',ti:'30 Min.',co:'€0'}]}},
+{id:'warranty',nm:'Garantieverlängerung',ic:'wa',p:1,co:'#2D6A4F',cl:'#D8F3DC',t:3,
+d:'5 Jahre statt 1–2. < 3% Inanspruchnahme, sofortige Differenzierung.',l:'Stärkere Garantie → höhere Abschlussrate',cp:'Kostet fast nichts, wirkt enorm.',
+dt:{tg:'5-Jahres-Garantie kostet nichts — ist aber der Grund für die Unterschrift.',ri:[{v:'< 3%',l:'Inanspruchnahme'},{v:'15–25%',l:'Conversion+'},{v:'~€0',l:'Eff. Kosten'}],w:'Verlängerte Material-/Arbeitsgarantie 5+ Jahre.',y:'Unter 3% nutzen es, aber enorme Kaufwirkung.',c:[{l:'Rücklage',v:'2–3%'},{l:'Urkunde',v:'€100–200'},{l:'Anwalt',v:'€200–400'}],s:[{t:'Umfang',d:'3/5/10 Jahre?',ti:'1 Std.',co:'€0'},{t:'Recht',d:'Bedingungen.',ti:'1 Wo.',co:'€200–400'},{t:'Zertifikat',d:'Design.',ti:'2 Std.',co:'€100–200'},{t:'Integrieren',d:'In KV + Ads.',ti:'1 Std.',co:'€0'}]}},
+{id:'influencer',nm:'Influencer',ic:'in',p:1,co:'#3730A3',cl:'#E8E7F8',t:3,
+d:'Lokale Creator dokumentieren Zusammenarbeit. €50–150/Post.',l:'Sichtbarkeit → Social Proof → Anfragen',cp:'Content für eigene Ads zweitverwertbar. 5–11× ROI.',
+dt:{tg:'Authentische Markenbotschafter.',ri:[{v:'€50–150',l:'Pro Post'},{v:'5–11×',l:'ROI'},{v:'3–5×',l:'Engagement vs. Macro'}],w:'Lokale Creator dokumentieren echte Zusammenarbeit. Content für Ads und GBP.',y:'Höheres Engagement, lokale Reichweite, günstig.',c:[{l:'Pro Post',v:'€50–150'},{l:'Rechte',v:'€50–100'},{l:'Koordination',v:'2–3 Std.'}],s:[{t:'Finden',d:'Instagram/TikTok lokal.',ti:'3 Std.',co:'€0'},{t:'Ansprechen',d:'DM mit Angebot.',ti:'2 Std.',co:'€0'},{t:'Dokumentieren',d:'Prozess filmen.',ti:'1 Tag',co:'€50–150'},{t:'Zweitverwerten',d:'Ads + GBP.',ti:'1 Std.',co:'€50–100'}]}},
+];
+
+const GA={id:'gads',nm:'Google Ads Budget',ic:'ga',co:'#2D6A4F',cl:'#D8F3DC',
+dt:{tg:'Der Motor. Ohne Ads kein Gewinn — ohne Gewinn kein Flywheel.',ri:[{v:'3–6×',l:'ROAS'},{v:'€20–80',l:'Pro Lead'},{v:'€5–15',l:'CPC'}],w:'Suchanzeigen bei Kaufabsicht: "Maler Hamburg", "Fenster einbauen Kosten".',y:'Kein anderer Kanal hat dieses Timing. ROAS typisch 3–6×.',c:[{l:'Budget',v:'€1k–5k+/Mo.'},{l:'Management',v:'10–20%'},{l:'Landing Page',v:'€500–2k'},{l:'Tracking',v:'€30–100/Mo.'}],s:[{t:'Keywords',d:'Dienstleistung + Stadt.',ti:'3–4 Std.',co:'€0'},{t:'Kampagne',d:'Search + negative Keywords.',ti:'4–6 Std.',co:'€0'},{t:'Landing Page',d:'Pro Dienstleistung.',ti:'1–2 Wo.',co:'€500–2k'},{t:'Optimierung',d:'Wöchentlich.',ti:'2–4 Std./Wo.',co:'Laufend'}]}};
+
+const BP=[
+{c:'Google Business Profile',ic:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',items:[
+{t:'Auf jede Bewertung innerhalb 24h antworten',d:'Professionell, persönlich, nie generisch.'},
+{t:'Wöchentlich Google-Beitrag veröffentlichen',d:'Projekte, Tipps — hält Profil aktiv.'},
+{t:'Min. 20 aktuelle Fotos im Profil',d:'Projekte, Team, Werkstatt, Fahrzeuge.'},
+{t:'Öffnungszeiten monatlich prüfen',d:'Falsche Zeiten = verlorene Kunden.'},
+{t:'FAQ-Bereich aktiv pflegen',d:'Häufige Fragen proaktiv beantworten.'}]},
+{c:'Website',ic:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',items:[
+{t:'Telefonnummer auf jeder Seite (Click-to-Call)',d:'Mobil muss ein Tipp reichen.'},
+{t:'Mobile Ladezeit unter 3 Sekunden',d:'53% verlassen langsamere Seiten.'},
+{t:'Referenzprojekte mit Fotos',d:'Min. 5 Projekte mit Vorher/Nachher.'}]},
+{c:'Ads & Tracking',ic:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',items:[
+{t:'Conversion-Tracking korrekt eingerichtet',d:'Ohne Tracking keine Optimierung.'}]},
+{c:'Kundenprozess',ic:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>',items:[
+{t:'Lead-Reaktionszeit unter 15 Min.',d:'Messen und tracken.'},
+{t:'Auto-Terminbestätigung per Email/SMS',d:'Reduziert No-Shows sofort.'},
+{t:'Follow-up 48h nach Auftrag',d:'Danke + Bewertungslink.'},
+{t:'Empfehlungsprogramm kommuniziert',d:'Visitenkarte, Signatur, Website.'},
+{t:'Kundenzufriedenheit abfragen',d:'Skala 1–10 nach jedem Auftrag.'}]}
+];
+
+// HELPERS
+let bR=D.filter(c=>!c.fix).map(c=>c.p);let bT=bR.reduce((s,v)=>s+v,0)||1;bR=bR.map(r=>r/bT);
+const fm=n=>'€'+Math.round(n).toLocaleString('de-DE');
+const TM={1:{lb:'Tier 1 — Kern (80% Impact)'},2:{lb:'Tier 2 — Wachstum (15%)'},3:{lb:'Tier 3 — Compound & Branding (5%)'}};
+
+function sp(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById('p-'+id).classList.add('on');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');window.scrollTo(0,0)}
+
+function rT(){
+const el=document.getElementById('tc');let h='';
+[1,2,3].forEach(t=>{const cs=D.filter(c=>c.t===t);
+h+=`<div class="th t${t}"><span class="tb">${TM[t].lb}</span></div><div class="cg">`;
+cs.forEach(c=>{const gi=D.indexOf(c);const isToggle=!!c.fix;
+h+=`<div class="cc" id="cd-${c.id}" onclick="if(event.target.tagName!=='INPUT'&&!event.target.classList.contains('tgl'))sd('${c.id}')"><span class="dh">Details →</span>
+<div class="tp"><div class="ic" style="background:${c.cl};color:${c.co}">${IC[c.ic]}</div>
+<div class="ca">${isToggle?`<div style="font-family:var(--fd);font-size:18px;color:${calendlyOn?c.co:'var(--td)'}">€${c.fix}</div><div class="cap">${calendlyOn?'aktiv':'inaktiv'}</div>`:`<div class="car"><span class="cas" style="color:${c.co}">€</span><input class="can" type="number" id="ea-${c.id}" min="0" step="10" style="color:${c.co}" oninput="ae(${gi},this.value)"></div><div class="cap">/ Monat</div>`}${c.rc?`<div class="cax" style="color:${c.co}" id="rv-${c.id}"></div>`:''}</div></div>
+<div class="nm">${c.nm}</div><div class="ds">${c.d}</div>
+<div class="lp" style="border-color:${c.co}">↻ ${c.l}</div>
+${isToggle?`<div class="tgl-row"><div class="tgl ${calendlyOn?'on':''}" onclick="event.stopPropagation();calendlyOn=!calendlyOn;rT();up()"></div><span class="tgl-label">${calendlyOn?'Aktiv — €12/Mo.':'Deaktiviert'}</span></div>`:`<div class="csr2"><input type="range" min="0" max="15" step="0.5" value="${c.p}" id="sl-${c.id}" oninput="se(${gi},+this.value)"><span class="cpb2" style="color:${c.co}" id="pc-${c.id}">${c.p}%</span></div>`}</div>`});
+h+=`</div>`});
+el.innerHTML=h;
+const s=document.createElement('style');
+s.textContent=D.filter(c=>!c.fix).map(c=>`#cd-${c.id} .csr2 input::-webkit-slider-thumb{background:${c.co}}#cd-${c.id} .csr2 input::-moz-range-thumb{background:${c.co}}`).join('');
+document.head.appendChild(s);
+}
+
+function se(i,v){D[i].p=v;sM();up()}
+function ae(i,v){const p=Math.max(0,+document.getElementById('pi').value||0);if(p<=0)return;D[i].p=Math.round((Math.max(0,+v||0)/p)*1000)/10;const sl=document.getElementById('sl-'+D[i].id);if(sl)sl.value=D[i].p;sM();up(true)}
+function sM(){const t=D.filter(c=>!c.fix).reduce((s,c)=>s+c.p,0);document.getElementById('mp').value=Math.round(t);document.getElementById('mpd').textContent=Math.round(t);const scalable=D.filter(c=>!c.fix);if(t>0)bR=scalable.map(c=>c.p/t)}
+function sc(tp){document.getElementById('mpd').textContent=tp;const scalable=D.filter(c=>!c.fix);scalable.forEach((c,i)=>{c.p=Math.round(bR[i]*tp*10)/10;const sl=document.getElementById('sl-'+c.id);if(sl)sl.value=c.p});up()}
+
+function rSplit(tp){
+const profit=Math.max(0,+document.getElementById('pi').value||0);
+const active=D.filter(c=>!c.fix&&c.p>0).sort((a,b)=>b.p-a.p);
+const fixAmt=calendlyOn?12:0;
+const kp=Math.max(0,100-tp);
+let mH=active.map(c=>`<div class="sg" style="flex:${c.p};background:${c.co};opacity:.85" title="${c.nm}: ${Math.round(c.p*10)/10}%"></div>`).join('');
+document.getElementById('spm').innerHTML=`<div class="si" style="flex:${Math.max(tp,1)}">${mH}</div><div class="sk" style="flex:${Math.max(kp,1)}">${kp>=6?Math.round(kp)+'%':''}</div>`;
+const totalInvest=profit*tp/100+fixAmt;
+document.getElementById('sli').textContent=`Reinvestition — ${fm(totalInvest)}`;
+document.getElementById('slk').textContent=`Kunde — ${fm(profit-totalInvest)}`;
+const maxP=active.length?active[0].p:1;
+let bH=active.map(c=>{const a=profit*c.p/100;const w=Math.max(4,(c.p/maxP)*100);
+return`<div class="cbr"><div class="cbn">${c.nm}</div><div class="cbw"><div class="cbb" style="width:${w}%;background:${c.co}"><span>${w>25?fm(a):''}</span></div></div><div class="cba" style="color:${c.co}">${w<=25?fm(a):''} ${Math.round(c.p*10)/10}%</div></div>`}).join('');
+if(calendlyOn)bH+=`<div class="cbr"><div class="cbn">Calendly (fix)</div><div class="cbw"><div class="cbb" style="width:6%;background:#0B6E4F"><span></span></div></div><div class="cba" style="color:#0B6E4F">€12 fix</div></div>`;
+document.getElementById('cbs').innerHTML=bH;
+}
+
+function rL(){const active=D.filter(c=>(!c.fix&&c.p>0)||(c.fix&&calendlyOn));document.getElementById('fwl').innerHTML=active.map(c=>`<div class="fwi"><span class="la2" style="color:${c.co}">${IC[c.ic]}</span><div><strong>${c.nm}</strong> — ${c.cp}</div></div>`).join('')}
+
+function up(sk){
+const profit=Math.max(0,+document.getElementById('pi').value||0);
+const tp=Math.round(D.filter(c=>!c.fix).reduce((s,c)=>s+c.p,0)*10)/10;
+let ta=0;const fixAmt=calendlyOn?12:0;
+D.forEach(c=>{if(c.fix)return;const a=profit*c.p/100;ta+=a;
+if(!sk){const ea=document.getElementById('ea-'+c.id);if(ea&&document.activeElement!==ea)ea.value=Math.round(a)}
+const p=document.getElementById('pc-'+c.id);if(p)p.textContent=(Math.round(c.p*10)/10)+'%';
+if(c.rc){const rv=document.getElementById('rv-'+c.id);if(rv)rv.textContent='= '+Math.floor(a/c.rc)+' Reviews'}
+});
+document.getElementById('vr').textContent=fm(ta+fixAmt);document.getElementById('xr').textContent=Math.round(tp)+'%'+(calendlyOn?' + €12 fix':'');
+document.getElementById('vk').textContent=fm(profit-ta-fixAmt);document.getElementById('xk').textContent='Rest des Gewinns';
+const activeCount=D.filter(c=>(!c.fix&&c.p>0)||(c.fix&&calendlyOn)).length;
+document.getElementById('va').textContent=activeCount;
+document.getElementById('tbd').innerHTML=tp>60?`<span class="wr">${Math.round(tp)}% — reduzieren</span>`:`${Math.round(tp)}% zugewiesen`;
+rSplit(tp);rL();
+}
+
+function sd(id){
+const isG=id==='gads';const d=isG?GA:D.find(c=>c.id===id);if(!d)return;
+const dt=d.dt;const co=d.co;const cl2=d.cl||'#D8F3DC';
+document.getElementById('dv').style.display='none';document.getElementById('dtv').style.display='block';window.scrollTo(0,0);
+document.getElementById('dtc').innerHTML=`
+<div class="dh2"><div class="di" style="background:${cl2};color:${co}">${IC[d.ic]}</div><h1 style="color:${co}">${d.nm}</h1><div class="dtg">${dt.tg}</div></div>
+<div class="ris">${dt.ri.map(r=>`<div class="ric"><div class="rv" style="color:${co}">${r.v}</div><div class="rl">${r.l}</div></div>`).join('')}</div>
+<div class="dg"><div class="dc"><h3>Was?</h3><p>${dt.w}</p></div><div class="dc"><h3>Warum?</h3><p>${dt.y}</p></div></div>
+<div class="dc" style="margin-bottom:28px"><h3>Kosten</h3><ul>${dt.c.map(c=>`<li><span class="ll">${c.l}</span><span style="color:${co};font-weight:500">${c.v}</span></li>`).join('')}</ul></div>
+<div class="wfs"><h2>Workflow</h2>${dt.s.map((s,i)=>`<div class="wst"><div class="wsn" style="background:${cl2};color:${co}">${i+1}</div><div class="wsc"><h4>${s.t}</h4><p>${s.d}</p><div class="wm"><span>${s.ti}</span><span>${s.co}</span></div></div></div>`).join('')}</div>`}
+function hd(){document.getElementById('dtv').style.display='none';document.getElementById('dv').style.display='block'}
+
+let bs={};
+function rBP(){const el=document.getElementById('bpl');let h='';let i=0;
+BP.forEach(cat=>{h+=`<div class="bpcat"><h3><span class="bci" style="color:var(--tm)">${cat.ic}</span>${cat.c}</h3><div class="bpis">`;
+cat.items.forEach(it=>{const ck=bs[i]?'ck':'';h+=`<div class="bpi ${ck}" onclick="tb(${i},this)"><div class="bpx"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div><div class="bpt"><div class="bt">${it.t}</div><div class="bds">${it.d}</div></div></div>`;i++});
+h+=`</div></div>`});el.innerHTML=h;uBP()}
+function tb(i,el){bs[i]=!bs[i];el.classList.toggle('ck');uBP()}
+function uBP(){const t=BP.reduce((s,c)=>s+c.items.length,0);const d=Object.values(bs).filter(Boolean).length;document.getElementById('bpb').style.width=(d/t*100)+'%';document.getElementById('bpc').textContent=`${d}/${t}`}
+
+async function xPNG(){try{const c=await html2canvas(document.getElementById('dv'),{backgroundColor:'#FAFAF8',scale:2});const l=document.createElement('a');l.download=`flywheel-${new Date().toISOString().slice(0,10)}.png`;l.href=c.toDataURL('image/png');l.click()}catch(e){alert(e.message)}}
+function xJ(){const d={profit:+document.getElementById('pi').value||0,calendly:calendlyOn,ch:D.filter(c=>!c.fix).map(c=>({id:c.id,p:c.p})),bp:bs};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const l=document.createElement('a');l.download=`flywheel-${new Date().toISOString().slice(0,10)}.json`;l.href=URL.createObjectURL(b);l.click()}
+function mJ(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.profit)document.getElementById('pi').value=d.profit;if(typeof d.calendly==='boolean')calendlyOn=d.calendly;if(d.ch)d.ch.forEach(dc=>{const ch=D.find(c=>c.id===dc.id);if(ch){ch.p=dc.p;const sl=document.getElementById('sl-'+ch.id);if(sl)sl.value=ch.p}});if(d.bp){bs=d.bp;rBP()}sM();rT();up()}catch(err){alert('Fehler')}};r.readAsText(f);inp.value=''}
+
+rT();rBP();sM();up();
+</script>
+</body>
+</html>
