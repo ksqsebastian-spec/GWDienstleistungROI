@@ -39,9 +39,22 @@ INSERT INTO jobs (jahr, monat, kundenname, objektadresse, taetigkeit, herkunft, 
   (2026, 'März', 'Herr Klages', 'Krausestraße 34', 'WE-Tür Tauschen', 'Tischlerei in der Nähe', NULL, NULL, 'Folgt', '2026-03-01'),
   (2026, 'März', 'Herr Heikler', 'Garstedter Weg 167', 'Fenster Abdichten + Scheibentauschen', 'Kontaktformular', NULL, NULL, 'Folgt', '2026-03-01');
 
+-- Uploads tracking table
+CREATE TABLE IF NOT EXISTS uploads (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  filename TEXT NOT NULL,
+  rows_imported INTEGER NOT NULL DEFAULT 0,
+  rows_skipped INTEGER NOT NULL DEFAULT 0,
+  column_mapping JSONB, -- stores the mapping used for this import
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Disable RLS for now (single client, passcode auth)
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all access" ON jobs FOR ALL USING (true) WITH CHECK (true);
 
 ALTER TABLE config ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all access" ON config FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access" ON uploads FOR ALL USING (true) WITH CHECK (true);
