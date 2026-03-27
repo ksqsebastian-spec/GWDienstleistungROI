@@ -6,6 +6,7 @@ import { Job, Upload } from "@/lib/types";
 import SummaryBar from "@/components/SummaryBar";
 import JobGrid from "@/components/JobGrid";
 import FileImport from "@/components/FileImport";
+import ExportButton from "@/components/ExportButton";
 
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -84,6 +85,7 @@ export default function DashboardPage() {
             </svg>
             Import
           </button>
+          <ExportButton jobs={filteredJobs} />
           <label className="text-[10px] font-mono uppercase tracking-wider text-text-dim">
             Herkunft
           </label>
