@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { Job, Config } from "@/lib/types";
+import * as XLSX from "xlsx";
 import { CHANNELS, TIER_LABELS, TIER_COLORS, formatEuro, Channel } from "@/lib/flywheel-data";
 import BestPractices from "@/components/BestPractices";
+import ExportButton from "@/components/ExportButton";
 
 export default function FlywheelPage() {
   const [channels, setChannels] = useState<Channel[]>(
@@ -69,22 +71,75 @@ export default function FlywheelPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <span className="inline-block px-3 py-1 bg-accent-light text-accent text-[10px] font-mono uppercase tracking-wider rounded-full mb-3">
-          Profit-gestütztes Marketing
-        </span>
-        <h2 className="text-3xl font-semibold text-text mb-2">
-          Das <span className="text-accent italic">Flywheel</span>
-        </h2>
-        <p className="text-sm text-text-muted max-w-xl">
-          Gewinn aus Werbekunden wird anteilig in Kanäle reinvestiert, die den
-          Gesamtertrag steigern.
-        </p>
-        {loadedFromDB && (
-          <p className="text-[10px] font-mono text-text-dim mt-2">
-            Gewinn vorbelegt aus ROI-Rechnung (editierbar)
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <span className="inline-block px-3 py-1 bg-accent-light text-accent text-[10px] font-mono uppercase tracking-wider rounded-full mb-3">
+            Profit-gestütztes Marketing
+          </span>
+          <h2 className="text-3xl font-semibold text-text mb-2">
+            Das <span className="text-accent italic">Flywheel</span>
+          </h2>
+          <p className="text-sm text-text-muted max-w-xl">
+            Gewinn aus Werbekunden wird anteilig in Kanäle reinvestiert, die den
+            Gesamtertrag steigern.
           </p>
-        )}
+          {loadedFromDB && (
+            <p className="text-[10px] font-mono text-text-dim mt-2">
+              Gewinn vorbelegt aus ROI-Rechnung (editierbar)
+            </p>
+          )}
+        </div>
+        <ExportButton onClick={() => {
+          const wb = XLSX.utils.book_new();
+
+          // Sheet 1: Channel allocation
+          const channelRows = channels
+            .filter((c) => (!c.fix && c.p > 0) || (c.fix && calendlyOn))
+            .sort((a, b) => b.p - a.p)
+            .map((c) => ({
+              Kanal: c.nm,
+              "Tier": c.t,
+              "Anteil (%)": c.fix ? "fix" : c.p,
+              "Betrag (€/Monat)": c.fix ? c.fix : Math.round(profit * c.p / 100),
+              Beschreibung: c.d,
+              "Flywheel-Schleife": c.l,
+            }));
+          channelRows.push({
+            Kanal: "GESAMT REINVESTIERT",
+            "Tier": "" as unknown as number,
+            "Anteil (%)": Math.round(totalPct) as unknown as string,
+            "Betrag (€/Monat)": Math.round(totalInvest),
+            Beschreibung: "",
+            "Flywheel-Schleife": "",
+          });
+          channelRows.push({
+            Kanal: "KUNDE BEHÄLT",
+            "Tier": "" as unknown as number,
+            "Anteil (%)": Math.round(100 - totalPct) as unknown as string,
+            "Betrag (€/Monat)": Math.round(profit - totalInvest),
+            Beschreibung: "",
+            "Flywheel-Schleife": "",
+          });
+          const wsChannels = XLSX.utils.json_to_sheet(channelRows);
+          wsChannels["!cols"] = [{ wch: 28 }, { wch: 6 }, { wch: 12 }, { wch: 16 }, { wch: 50 }, { wch: 40 }];
+          XLSX.utils.book_append_sheet(wb, wsChannels, "Kanalverteilung");
+
+          // Sheet 2: Summary
+          const summaryRows = [
+            { Kennzahl: "Monatlicher Gewinn", Wert: profit, Einheit: "€" },
+            { Kennzahl: "Reinvestitions-Anteil", Wert: Math.round(totalPct), Einheit: "%" },
+            { Kennzahl: "Reinvestiert", Wert: Math.round(totalInvest), Einheit: "€" },
+            { Kennzahl: "Kunde behält", Wert: Math.round(profit - totalInvest), Einheit: "€" },
+            { Kennzahl: "Aktive Kanäle", Wert: activeChannels.length, Einheit: "" },
+          ];
+          const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+          wsSummary["!cols"] = [{ wch: 24 }, { wch: 12 }, { wch: 6 }];
+          XLSX.utils.book_append_sheet(wb, wsSummary, "Zusammenfassung");
+
+          XLSX.writeFile(wb, `GW-Flywheel_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }}>
+          Export
+        </ExportButton>
       </div>
 
       {/* Controls */}

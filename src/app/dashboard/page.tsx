@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/lib/supabase";
 import { Job, Upload } from "@/lib/types";
 import SummaryBar from "@/components/SummaryBar";
@@ -85,7 +86,22 @@ export default function DashboardPage() {
             </svg>
             Import
           </button>
-          <ExportButton jobs={filteredJobs} />
+          <ExportButton
+            disabled={filteredJobs.length === 0}
+            onClick={() => {
+              const rows = filteredJobs.map((j) => ({
+                Jahr: j.jahr, Monat: j.monat, Kundenname: j.kundenname,
+                Objektadresse: j.objektadresse, "Tätigkeit": j.taetigkeit,
+                Herkunft: j.herkunft, "Netto-Umsatz": j.netto_umsatz,
+                Rohertrag: j.rohertrag, Angebot: j.angebot, Datum: j.datum,
+              }));
+              const ws = XLSX.utils.json_to_sheet(rows);
+              ws["!cols"] = [{ wch: 6 }, { wch: 10 }, { wch: 20 }, { wch: 30 }, { wch: 30 }, { wch: 25 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 12 }];
+              const wb = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(wb, ws, "Aufträge");
+              XLSX.writeFile(wb, `GW-Auftraege_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            }}
+          />
           <label className="text-[10px] font-mono uppercase tracking-wider text-text-dim">
             Herkunft
           </label>
