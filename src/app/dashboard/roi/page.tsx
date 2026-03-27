@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/lib/supabase";
 import { Job, Config } from "@/lib/types";
 import {
@@ -10,6 +11,7 @@ import {
   formatPercent,
 } from "@/lib/calculations";
 import Tooltip from "@/components/Tooltip";
+import ExportButton from "@/components/ExportButton";
 
 function ConfigField({
   label,
@@ -94,13 +96,63 @@ export default function ROIPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-text">
-          <Tooltip text="Return on Investment — wie viel Gewinn die Investition in Google Ads und Homepage bisher zurückgebracht hat.">ROI</Tooltip>-Rechnung
-        </h2>
-        <p className="text-sm text-text-muted mt-1">
-          Google Ads & Homepage — automatisch berechnet
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-text">
+            <Tooltip text="Return on Investment — wie viel Gewinn die Investition in Google Ads und Homepage bisher zurückgebracht hat.">ROI</Tooltip>-Rechnung
+          </h2>
+          <p className="text-sm text-text-muted mt-1">
+            Google Ads & Homepage — automatisch berechnet
+          </p>
+        </div>
+        <ExportButton onClick={() => {
+          const wb = XLSX.utils.book_new();
+
+          // Sheet 1: Monthly ROI table
+          const roiRows = monthlyData.map((m) => ({
+            Monat: m.monat,
+            "Google Ads Ausgaben": m.google_ads_ausgaben,
+            Pflegekosten: m.pflegekosten,
+            "Kosten Gesamt": m.kosten_gesamt,
+            "Netto-Umsatz": m.netto_umsatz,
+            Rohertrag: m.rohertrag,
+            "Operative Marge": m.operative_marge,
+            Gesamtergebnis: m.gesamtergebnis,
+            "Kum. Gesamtkosten": m.kum_gesamtkosten,
+            "Kum. Operative Marge": m.kum_operative_marge,
+            "Kum. Ergebnis": m.kum_ergebnis,
+            "ROI (%)": Math.round(m.roi_pct * 100) / 100,
+            "ROI p.a. (%)": Math.round(m.roi_pa_pct * 100) / 100,
+          }));
+          const wsROI = XLSX.utils.json_to_sheet(roiRows);
+          wsROI["!cols"] = Array(13).fill({ wch: 16 });
+          XLSX.utils.book_append_sheet(wb, wsROI, "ROI-Rechnung");
+
+          // Sheet 2: Config & Break-Even
+          const configRows = [
+            { Kennzahl: "Homepage Erstellung", Wert: config.homepage_kosten, Einheit: "€" },
+            { Kennzahl: "Google Ads Setup", Wert: config.ads_setup_kosten, Einheit: "€" },
+            { Kennzahl: "Summe Einmalige Investitionen", Wert: einmalig, Einheit: "€" },
+            { Kennzahl: "", Wert: "", Einheit: "" },
+            { Kennzahl: "Pflegekosten / Monat", Wert: config.pflegekosten_monat, Einheit: "€" },
+            { Kennzahl: "Operative Marge", Wert: config.operative_marge_pct * 100, Einheit: "%" },
+            { Kennzahl: "Ø Aufträge / Monat", Wert: config.avg_auftraege_monat, Einheit: "" },
+            { Kennzahl: "", Wert: "", Einheit: "" },
+            { Kennzahl: "Ø Netto-Umsatz / Auftrag", Wert: breakEven.avgUmsatzProAuftrag, Einheit: "€" },
+            { Kennzahl: "Op. Ertrag / Auftrag", Wert: breakEven.operativerErtragProAuftrag, Einheit: "€" },
+            { Kennzahl: "Laufende Kosten / Monat", Wert: breakEven.laufendeKostenProMonat, Einheit: "€" },
+            { Kennzahl: "Überdeckung / Monat", Wert: breakEven.ueberdeckungProMonat, Einheit: "€" },
+            { Kennzahl: "Offene Investition", Wert: breakEven.offeneInvestition, Einheit: "€" },
+            { Kennzahl: "Monate bis Break-Even", Wert: breakEven.monateBreakEven === Infinity ? "—" : breakEven.monateBreakEven, Einheit: "" },
+          ];
+          const wsBE = XLSX.utils.json_to_sheet(configRows);
+          wsBE["!cols"] = [{ wch: 28 }, { wch: 14 }, { wch: 6 }];
+          XLSX.utils.book_append_sheet(wb, wsBE, "Break-Even");
+
+          XLSX.writeFile(wb, `GW-ROI-Rechnung_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }}>
+          Export
+        </ExportButton>
       </div>
 
       {/* Config Cards */}
