@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { Job, Config } from "@/lib/types";
 import { CHANNELS, TIER_LABELS, TIER_COLORS, formatEuro, Channel } from "@/lib/flywheel-data";
+import BestPractices from "@/components/BestPractices";
 
 export default function FlywheelPage() {
   const [channels, setChannels] = useState<Channel[]>(
@@ -391,6 +392,9 @@ export default function FlywheelPage() {
           ))}
         </div>
       </div>
+
+      {/* Best Practices */}
+      <BestPractices />
     </div>
   );
 }
