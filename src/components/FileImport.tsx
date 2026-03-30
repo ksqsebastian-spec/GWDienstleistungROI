@@ -44,8 +44,12 @@ function parseValue(
 
   if (fieldDef.type === "number") {
     // Handle "???" or non-numeric
-    const str = String(raw).replace(/[€\s]/g, "").replace(",", ".");
-    const num = parseFloat(str);
+    // German format: 1.317,50 → remove dots (thousands sep), replace comma with period
+    const str = String(raw).replace(/[€\s]/g, "");
+    const cleaned = str.includes(",")
+      ? str.replace(/\./g, "").replace(",", ".")
+      : str;
+    const num = parseFloat(cleaned);
     return isNaN(num) ? null : num;
   }
 
@@ -98,6 +102,12 @@ export default function FileImport({ onImportComplete }: FileImportProps) {
     setError(null);
     setResult(null);
     setPreviewMode(false);
+
+    // 10 MB limit
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Datei ist zu groß (max. 10 MB).");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (evt) => {

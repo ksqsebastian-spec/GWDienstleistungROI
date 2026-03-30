@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function PasscodePage() {
   const [passcode, setPasscode] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | false>(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -25,7 +25,7 @@ export default function PasscodePage() {
       sessionStorage.setItem("authenticated", "true");
       router.push("/dashboard");
     } else {
-      setError(true);
+      setError(data.error || "Falscher Code");
       setLoading(false);
     }
   }
@@ -64,7 +64,7 @@ export default function PasscodePage() {
             />
             {error && (
               <p className="text-red text-xs text-center mt-2 font-mono">
-                Falscher Code
+                {error}
               </p>
             )}
             <button
