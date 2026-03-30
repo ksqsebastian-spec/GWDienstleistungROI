@@ -133,6 +133,9 @@ export default function JobGrid({ jobs, onUpdate }: JobGridProps) {
         value = rawValue === "" ? null : parseFloat(rawValue);
       } else if (key === "jahr") {
         value = parseInt(rawValue) || new Date().getFullYear();
+      } else {
+        // Truncate text fields to 500 chars max
+        value = rawValue.slice(0, 500);
       }
 
       await supabase.from("jobs").update({ [key]: value }).eq("id", jobId);
