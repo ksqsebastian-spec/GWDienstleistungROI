@@ -8,8 +8,6 @@ import Receipt from "@/components/Receipt";
 
 export default function FlywheelPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [adsMonthlyBudget, setAdsMonthlyBudget] = useState(87.75);
-  const [adsPricing, setAdsPricing] = useState<"recurring" | "onetime">("recurring");
   const [totalBudget, setTotalBudget] = useState(8000);
   const [loadedFromDB, setLoadedFromDB] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
@@ -24,13 +22,10 @@ export default function FlywheelPage() {
       ]);
       const jobs = (jobsRes.data || []) as { rohertrag: number | null }[];
       const config = configRes.data as Config | null;
-      if (config) {
-        setAdsMonthlyBudget(config.google_ads_budget || 87.75);
-        if (jobs.length > 0) {
-          const totalRohertrag = jobs.reduce((s, j) => s + (j.rohertrag || 0), 0);
-          const monthlyMarge = totalRohertrag * config.operative_marge_pct;
-          if (monthlyMarge > 0) setTotalBudget(Math.round(monthlyMarge));
-        }
+      if (config && jobs.length > 0) {
+        const totalRohertrag = jobs.reduce((s, j) => s + (j.rohertrag || 0), 0);
+        const monthlyMarge = totalRohertrag * config.operative_marge_pct;
+        if (monthlyMarge > 0) setTotalBudget(Math.round(monthlyMarge));
       }
       setLoadedFromDB(true);
     }
@@ -58,37 +53,34 @@ export default function FlywheelPage() {
     );
   }, []);
 
-  // Purchase handler — saves cart items to Supabase and clears cart
+  const toggleCartPricing = useCallback((channelId: string) => {
+    setCart((prev) =>
+      prev.map((i) =>
+        i.channelId === channelId
+          ? { ...i, pricing: i.pricing === "recurring" ? "onetime" : "recurring" }
+          : i
+      )
+    );
+  }, []);
+
+  // Purchase handler
   const handlePurchase = async () => {
-    if (cart.length === 0 && adsMonthlyBudget <= 0) return;
+    if (cart.length === 0) return;
     setPurchasing(true);
     setPurchaseSuccess(false);
 
     const now = new Date().toISOString();
-    const rows = [
-      // Google Ads budget is always included
-      ...(adsMonthlyBudget > 0
-        ? [{
-            channel_id: "google-ads",
-            channel_name: "Google Ads Budget",
-            amount: adsMonthlyBudget,
-            pricing: adsPricing,
-            note: adsPricing === "recurring" ? "Monatliches Google Ads Werbebudget" : "Einmaliges Google Ads Budget",
-            purchased_at: now,
-          }]
-        : []),
-      ...cart.map((item) => {
-        const ch = CHANNELS.find((c) => c.id === item.channelId);
-        return {
-          channel_id: item.channelId,
-          channel_name: ch?.nm || item.channelId,
-          amount: item.amount,
-          pricing: item.pricing,
-          note: "",
-          purchased_at: now,
-        };
-      }),
-    ];
+    const rows = cart.map((item) => {
+      const ch = CHANNELS.find((c) => c.id === item.channelId);
+      return {
+        channel_id: item.channelId,
+        channel_name: ch?.nm || item.channelId,
+        amount: item.amount,
+        pricing: item.pricing,
+        note: "",
+        purchased_at: now,
+      };
+    });
 
     const { error } = await supabase.from("purchases").insert(rows);
     setPurchasing(false);
@@ -100,13 +92,12 @@ export default function FlywheelPage() {
   };
 
   // Budget calculations
-  const adsIsRecurring = adsPricing === "recurring";
   const recurringSpend = cart
     .filter((i) => i.pricing === "recurring")
-    .reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? adsMonthlyBudget : 0);
+    .reduce((s, i) => s + i.amount, 0);
   const onetimeSpend = cart
     .filter((i) => i.pricing === "onetime")
-    .reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? 0 : adsMonthlyBudget);
+    .reduce((s, i) => s + i.amount, 0);
   const totalSpend = recurringSpend + onetimeSpend;
   const remaining = totalBudget - totalSpend;
   const spendPct = totalBudget > 0 ? Math.min(100, (totalSpend / totalBudget) * 100) : 0;
@@ -167,7 +158,6 @@ export default function FlywheelPage() {
             </div>
           </div>
         </div>
-        {/* Progress bar */}
         <div className="h-3 bg-surface-3 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${remaining >= 0 ? "bg-accent" : "bg-red"}`}
@@ -180,64 +170,13 @@ export default function FlywheelPage() {
         </div>
       </div>
 
-      {/* Google Ads Engine — Priority #1 */}
-      <div className="bg-surface border-2 border-accent rounded-xl p-6 mb-6 relative overflow-hidden">
-        <div className="absolute top-2 right-4 text-[64px] font-semibold text-accent/5 leading-none">#1</div>
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded-full">
-                Der Motor — Priorität #1
-              </span>
-            </div>
-            <h3 className="text-lg font-semibold text-text mb-1">Google Ads Budget</h3>
-            <p className="text-xs text-text-muted max-w-md">
-              Generiert Kunden. Alle anderen Kanäle werden aus dem resultierenden Gewinn finanziert. ROAS typisch 3–6x.
-            </p>
-          </div>
-          <div className="text-right space-y-2">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg text-text-dim">€</span>
-              <input
-                type="number"
-                value={adsMonthlyBudget}
-                onChange={(e) => setAdsMonthlyBudget(Math.max(0, parseFloat(e.target.value) || 0))}
-                className="text-2xl font-semibold text-accent bg-transparent border-b-2 border-surface-3 focus:border-accent outline-none w-28 text-right font-mono"
-                step={10}
-              />
-            </div>
-            <div className="flex gap-1 justify-end">
-              <button
-                onClick={() => setAdsPricing("recurring")}
-                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors ${
-                  adsPricing === "recurring"
-                    ? "bg-blue text-white"
-                    : "bg-surface-2 text-text-dim hover:bg-surface-3"
-                }`}
-              >
-                monatlich
-              </button>
-              <button
-                onClick={() => setAdsPricing("onetime")}
-                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors ${
-                  adsPricing === "onetime"
-                    ? "bg-amber text-white"
-                    : "bg-surface-2 text-text-dim hover:bg-surface-3"
-                }`}
-              >
-                einmalig
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main layout: Shop + Receipt side by side */}
       <div className="grid grid-cols-3 gap-6 mb-8">
         {/* Shop — 2 cols */}
         <div className="col-span-2">
-          {[1, 2, 3].map((tier) => {
+          {[0, 1, 2, 3].map((tier) => {
             const tierChannels = CHANNELS.filter((c) => c.t === tier);
+            if (tierChannels.length === 0) return null;
             const colors = TIER_COLORS[tier];
             return (
               <div key={tier}>
@@ -249,37 +188,41 @@ export default function FlywheelPage() {
                     {TIER_LABELS[tier]}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-1.5">
+                <div className={`grid gap-3 mb-1.5 ${tier === 0 ? "grid-cols-1" : "grid-cols-2"}`}>
                   {tierChannels.map((ch) => {
                     const inCart = isInCart(ch.id);
                     const cartItem = cart.find((i) => i.channelId === ch.id);
+                    const isEngine = tier === 0;
                     return (
                       <div
                         key={ch.id}
-                        className={`bg-surface border rounded-xl p-5 transition-all ${
+                        className={`bg-surface border rounded-xl p-5 transition-all relative overflow-hidden ${
                           inCart
-                            ? "border-accent shadow-sm"
-                            : "border-border hover:border-border-hover hover:shadow-sm"
+                            ? isEngine ? "border-accent border-2 shadow-md" : "border-accent shadow-sm"
+                            : isEngine ? "border-accent/50 border-2" : "border-border hover:border-border-hover hover:shadow-sm"
                         }`}
                       >
+                        {isEngine && (
+                          <div className="absolute top-2 right-4 text-[64px] font-semibold text-accent/5 leading-none">#1</div>
+                        )}
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             <div
-                              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                              className={`${isEngine ? "w-10 h-10" : "w-8 h-8"} rounded-lg flex items-center justify-center text-sm`}
                               style={{ backgroundColor: ch.cl, color: ch.co }}
                             >
                               ●
                             </div>
                             <div>
-                              <p className="text-[13px] font-semibold">{ch.nm}</p>
+                              <p className={`font-semibold ${isEngine ? "text-base" : "text-[13px]"}`}>{ch.nm}</p>
                               <span
                                 className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                                  ch.pricing === "recurring"
+                                  (cartItem?.pricing || ch.pricing) === "recurring"
                                     ? "bg-blue-light text-blue"
                                     : "bg-amber-light text-amber"
                                 }`}
                               >
-                                {ch.pricing === "recurring" ? "monatlich" : "einmalig"}
+                                {(cartItem?.pricing || ch.pricing) === "recurring" ? "monatlich" : "einmalig"}
                               </span>
                             </div>
                           </div>
@@ -288,7 +231,7 @@ export default function FlywheelPage() {
                           )}
                         </div>
 
-                        <p className="text-[11px] text-text-muted leading-relaxed mb-2">
+                        <p className={`text-text-muted leading-relaxed mb-2 ${isEngine ? "text-xs" : "text-[11px]"}`}>
                           {ch.d}
                         </p>
 
@@ -314,9 +257,16 @@ export default function FlywheelPage() {
                                 style={{ color: ch.co }}
                                 step={ch.pricing === "recurring" ? 10 : 50}
                               />
-                              <span className="text-[10px] font-mono text-text-dim">
-                                {ch.pricing === "recurring" ? "/Mo." : "einmalig"}
-                              </span>
+                              <button
+                                onClick={() => toggleCartPricing(ch.id)}
+                                className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                                  cartItem!.pricing === "recurring"
+                                    ? "bg-blue-light text-blue hover:bg-blue hover:text-white"
+                                    : "bg-amber-light text-amber hover:bg-amber hover:text-white"
+                                }`}
+                              >
+                                {cartItem!.pricing === "recurring" ? "monatl." : "einmal."}
+                              </button>
                             </div>
                             <input
                               type="range"
@@ -348,7 +298,9 @@ export default function FlywheelPage() {
                             </span>
                             <button
                               onClick={() => addToCart(ch)}
-                              className="text-[11px] font-mono px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5"
+                              className={`text-[11px] font-mono px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 ${
+                                isEngine ? "px-5 py-2 text-xs font-semibold" : ""
+                              }`}
                               style={{
                                 borderColor: ch.co + "40",
                                 color: ch.co,
@@ -375,16 +327,14 @@ export default function FlywheelPage() {
 
         {/* Receipt Sidebar — 1 col, sticky */}
         <div className="col-span-1">
-          <div className="sticky top-8">
+          <div className="sticky top-20">
             <Receipt
               cart={cart}
-              adsMonthlyBudget={adsMonthlyBudget}
-              adsPricing={adsPricing}
               totalBudget={totalBudget}
             />
 
             {/* Purchase button */}
-            {(cart.length > 0 || adsMonthlyBudget > 0) && (
+            {cart.length > 0 && (
               <div className="mt-4">
                 <button
                   onClick={handlePurchase}
