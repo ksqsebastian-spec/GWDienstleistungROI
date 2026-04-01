@@ -5,13 +5,14 @@ import { supabase } from "@/lib/supabase";
 import { Config } from "@/lib/types";
 import { CHANNELS, TIER_LABELS, TIER_COLORS, formatEuro, Channel, CartItem } from "@/lib/flywheel-data";
 import Receipt from "@/components/Receipt";
-import BestPractices from "@/components/BestPractices";
 
 export default function FlywheelPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [adsMonthlyBudget, setAdsMonthlyBudget] = useState(87.75);
   const [totalBudget, setTotalBudget] = useState(8000);
   const [loadedFromDB, setLoadedFromDB] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
   // Load budget from DB
   useEffect(() => {
@@ -55,6 +56,47 @@ export default function FlywheelPage() {
       prev.map((i) => (i.channelId === channelId ? { ...i, amount } : i))
     );
   }, []);
+
+  // Purchase handler — saves cart items to Supabase and clears cart
+  const handlePurchase = async () => {
+    if (cart.length === 0 && adsMonthlyBudget <= 0) return;
+    setPurchasing(true);
+    setPurchaseSuccess(false);
+
+    const now = new Date().toISOString();
+    const rows = [
+      // Google Ads budget is always included
+      ...(adsMonthlyBudget > 0
+        ? [{
+            channel_id: "google-ads",
+            channel_name: "Google Ads Budget",
+            amount: adsMonthlyBudget,
+            pricing: "recurring" as const,
+            note: "Monatliches Google Ads Werbebudget",
+            purchased_at: now,
+          }]
+        : []),
+      ...cart.map((item) => {
+        const ch = CHANNELS.find((c) => c.id === item.channelId);
+        return {
+          channel_id: item.channelId,
+          channel_name: ch?.nm || item.channelId,
+          amount: item.amount,
+          pricing: item.pricing,
+          note: "",
+          purchased_at: now,
+        };
+      }),
+    ];
+
+    const { error } = await supabase.from("purchases").insert(rows);
+    setPurchasing(false);
+    if (!error) {
+      setPurchaseSuccess(true);
+      setCart([]);
+      setTimeout(() => setPurchaseSuccess(false), 4000);
+    }
+  };
 
   // Budget calculations
   const recurringSpend = cart
@@ -317,6 +359,31 @@ export default function FlywheelPage() {
               totalBudget={totalBudget}
             />
 
+            {/* Purchase button */}
+            {(cart.length > 0 || adsMonthlyBudget > 0) && (
+              <div className="mt-4">
+                <button
+                  onClick={handlePurchase}
+                  disabled={purchasing}
+                  className="w-full py-3 bg-accent text-white rounded-xl text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
+                >
+                  {purchasing ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Wird gebucht...
+                    </>
+                  ) : (
+                    <>Jetzt kaufen</>
+                  )}
+                </button>
+                {purchaseSuccess && (
+                  <p className="text-xs font-mono text-accent text-center mt-2">
+                    Einkauf gespeichert — siehe Ausgaben-Tab
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Compound loops for items in cart */}
             {cart.length > 0 && (
               <div className="bg-surface border border-border rounded-xl p-5 mt-4">
@@ -341,9 +408,6 @@ export default function FlywheelPage() {
           </div>
         </div>
       </div>
-
-      {/* Best Practices */}
-      <BestPractices />
     </div>
   );
 }

@@ -49,6 +49,17 @@ export interface Upload {
   created_at: string;
 }
 
+export interface Purchase {
+  id: string;
+  channel_id: string;
+  channel_name: string;
+  amount: number;
+  pricing: "recurring" | "onetime";
+  note: string;
+  purchased_at: string;
+  created_at: string;
+}
+
 // The DB columns that can be mapped from an import file
 export const IMPORTABLE_FIELDS = [
   { key: "jahr", label: "Jahr", type: "number" },
