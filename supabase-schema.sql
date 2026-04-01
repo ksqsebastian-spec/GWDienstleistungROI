@@ -53,6 +53,18 @@ CREATE TABLE IF NOT EXISTS uploads (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Purchases table (marketing spend from flywheel)
+CREATE TABLE IF NOT EXISTS purchases (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  channel_id TEXT NOT NULL,
+  channel_name TEXT NOT NULL,
+  amount NUMERIC NOT NULL,
+  pricing TEXT NOT NULL CHECK (pricing IN ('recurring', 'onetime')),
+  note TEXT DEFAULT '',
+  purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Disable RLS for now (single client, passcode auth)
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all access" ON jobs FOR ALL USING (true) WITH CHECK (true);
@@ -62,3 +74,12 @@ CREATE POLICY "Allow all access" ON config FOR ALL USING (true) WITH CHECK (true
 
 ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all access" ON uploads FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all access" ON purchases FOR ALL USING (true) WITH CHECK (true);
+
+-- Migration: run these if you already have the tables
+-- ALTER TABLE config ADD COLUMN IF NOT EXISTS google_ads_budget NUMERIC NOT NULL DEFAULT 87.75;
+-- CREATE TABLE IF NOT EXISTS purchases (id UUID DEFAULT gen_random_uuid() PRIMARY KEY, channel_id TEXT NOT NULL, channel_name TEXT NOT NULL, amount NUMERIC NOT NULL, pricing TEXT NOT NULL CHECK (pricing IN ('recurring', 'onetime')), note TEXT DEFAULT '', purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), created_at TIMESTAMPTZ DEFAULT NOW());
+-- ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Allow all access" ON purchases FOR ALL USING (true) WITH CHECK (true);
