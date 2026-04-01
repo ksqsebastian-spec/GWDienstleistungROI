@@ -17,6 +17,7 @@ export interface Config {
   id: string;
   homepage_kosten: number;
   ads_setup_kosten: number;
+  google_ads_budget: number;
   pflegekosten_monat: number;
   operative_marge_pct: number;
   avg_auftraege_monat: number;
