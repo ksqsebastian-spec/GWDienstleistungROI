@@ -244,7 +244,35 @@ export default function FlywheelPage() {
 
                         {/* Price + Action */}
                         {inCart ? (
-                          <div className="space-y-2">
+                          <div className="space-y-3">
+                            {/* Pricing toggle — always visible */}
+                            <div className="flex gap-1 rounded-full bg-surface-2 p-1 w-fit">
+                              <button
+                                onClick={() => setCart((prev) =>
+                                  prev.map((i) => i.channelId === ch.id ? { ...i, pricing: "recurring" } : i)
+                                )}
+                                className={`text-[10px] font-mono uppercase tracking-wider px-4 py-1.5 rounded-full transition-colors ${
+                                  cartItem!.pricing === "recurring"
+                                    ? "bg-blue text-white shadow-sm"
+                                    : "text-text-dim hover:bg-surface-3"
+                                }`}
+                              >
+                                Monatlich
+                              </button>
+                              <button
+                                onClick={() => setCart((prev) =>
+                                  prev.map((i) => i.channelId === ch.id ? { ...i, pricing: "onetime" } : i)
+                                )}
+                                className={`text-[10px] font-mono uppercase tracking-wider px-4 py-1.5 rounded-full transition-colors ${
+                                  cartItem!.pricing === "onetime"
+                                    ? "bg-amber text-white shadow-sm"
+                                    : "text-text-dim hover:bg-surface-3"
+                                }`}
+                              >
+                                Einmalig
+                              </button>
+                            </div>
+                            {/* Amount input */}
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] font-mono text-text-dim">€</span>
                               <input
@@ -255,18 +283,11 @@ export default function FlywheelPage() {
                                 }
                                 className="flex-1 text-sm font-mono font-semibold bg-transparent border-b border-accent outline-none"
                                 style={{ color: ch.co }}
-                                step={ch.pricing === "recurring" ? 10 : 50}
+                                step={cartItem!.pricing === "recurring" ? 10 : 50}
                               />
-                              <button
-                                onClick={() => toggleCartPricing(ch.id)}
-                                className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
-                                  cartItem!.pricing === "recurring"
-                                    ? "bg-blue-light text-blue hover:bg-blue hover:text-white"
-                                    : "bg-amber-light text-amber hover:bg-amber hover:text-white"
-                                }`}
-                              >
-                                {cartItem!.pricing === "recurring" ? "monatl." : "einmal."}
-                              </button>
+                              <span className="text-[10px] font-mono text-text-dim">
+                                {cartItem!.pricing === "recurring" ? "/Mo." : "einmalig"}
+                              </span>
                             </div>
                             <input
                               type="range"
