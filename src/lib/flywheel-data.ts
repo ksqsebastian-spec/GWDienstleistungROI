@@ -24,6 +24,8 @@ export interface CartItem {
 }
 
 export const CHANNELS: Channel[] = [
+  // T0 — Google Ads (The Engine, Priority #1)
+  { id: "google-ads", nm: "Google Ads Budget", ic: "ga", p: 10, co: "#2D6A4F", cl: "#D8F3DC", t: 0, d: "Der Motor. Generiert Kunden über Suchanzeigen bei Kaufabsicht. ROAS typisch 3–6x. Alle anderen Kanäle werden aus dem resultierenden Gewinn finanziert.", l: "Mehr Ads-Budget → mehr Leads → mehr Umsatz → mehr Gewinn → mehr Budget", cp: "Kein anderer Kanal hat dieses Timing. €20–80 pro Lead.", pricing: "recurring", minCost: 50, maxCost: 5000, defaultCost: 500 },
   // T1 — Recurring
   { id: "guarantee", nm: "Garantie-Fonds", ic: "g", p: 5, co: "#2D6A4F", cl: "#D8F3DC", t: 1, d: "Unwiderstehliche Garantie — Rückgabequote < 5%, Conversion +20–40%.", l: "Stärkere Garantie → weniger Risiko → mehr Abschlüsse", cp: "Hormozis #1 Conversion-Hebel.", pricing: "recurring", minCost: 50, maxCost: 500, defaultCost: 150 },
   { id: "speed", nm: "Speed / VIP-Reaktion", ic: "s", p: 5, co: "#C1440E", cl: "#FDECE5", t: 1, d: "Sofort-Reaktion, Auto-SMS, Follow-up-Emails, Erinnerungen. 21x höhere Kontaktrate bei 5 Min.", l: "Schneller reagieren + automatisch nachfassen → höhere Close-Rate", cp: "78% kaufen beim Erstreagierer.", pricing: "recurring", minCost: 50, maxCost: 300, defaultCost: 100 },
@@ -44,12 +46,14 @@ export const CHANNELS: Channel[] = [
 ];
 
 export const TIER_LABELS: Record<number, string> = {
+  0: "Priorität #1 — Der Motor",
   1: "Tier 1 — Kern (80% Impact)",
   2: "Tier 2 — Wachstum (15%)",
   3: "Tier 3 — Compound & Branding (5%)",
 };
 
 export const TIER_COLORS: Record<number, { bg: string; text: string }> = {
+  0: { bg: "#D8F3DC", text: "#2D6A4F" },
   1: { bg: "#D8F3DC", text: "#2D6A4F" },
   2: { bg: "#FFF3E0", text: "#B5651D" },
   3: { bg: "#F0E6FA", text: "#5A189A" },

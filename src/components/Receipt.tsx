@@ -5,8 +5,6 @@ import { CartItem, Channel, CHANNELS, formatEuro } from "@/lib/flywheel-data";
 
 interface ReceiptProps {
   cart: CartItem[];
-  adsMonthlyBudget: number;
-  adsPricing: "recurring" | "onetime";
   totalBudget: number;
 }
 
@@ -14,12 +12,11 @@ function getChannel(id: string): Channel | undefined {
   return CHANNELS.find((c) => c.id === id);
 }
 
-export default function Receipt({ cart, adsMonthlyBudget, adsPricing, totalBudget }: ReceiptProps) {
+export default function Receipt({ cart, totalBudget }: ReceiptProps) {
   const recurring = cart.filter((i) => i.pricing === "recurring");
   const onetime = cart.filter((i) => i.pricing === "onetime");
-  const adsIsRecurring = adsPricing === "recurring";
-  const recurringTotal = recurring.reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? adsMonthlyBudget : 0);
-  const onetimeTotal = onetime.reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? 0 : adsMonthlyBudget);
+  const recurringTotal = recurring.reduce((s, i) => s + i.amount, 0);
+  const onetimeTotal = onetime.reduce((s, i) => s + i.amount, 0);
   const totalSpend = recurringTotal + onetimeTotal;
   const remaining = totalBudget - totalSpend;
 
@@ -27,7 +24,6 @@ export default function Receipt({ cart, adsMonthlyBudget, adsPricing, totalBudge
     const wb = XLSX.utils.book_new();
 
     const receiptRows = [
-      { Position: `GOOGLE ADS BUDGET (${adsIsRecurring ? "MONATLICH" : "EINMALIG"})`, Typ: adsIsRecurring ? "Monatlich" : "Einmalig", "Betrag (€)": adsMonthlyBudget },
       ...recurring.map((i) => ({
         Position: getChannel(i.channelId)?.nm || i.channelId,
         Typ: "Monatlich",
@@ -55,7 +51,7 @@ export default function Receipt({ cart, adsMonthlyBudget, adsPricing, totalBudge
     XLSX.writeFile(wb, `GW-Marketing-Beleg_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  if (cart.length === 0 && adsMonthlyBudget === 0) {
+  if (cart.length === 0) {
     return (
       <div className="bg-surface border border-border rounded-xl p-6 text-center">
         <p className="text-sm text-text-dim font-mono">
@@ -82,26 +78,10 @@ export default function Receipt({ cart, adsMonthlyBudget, adsPricing, totalBudge
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            XLSX Export
+            XLSX
           </button>
         </div>
       </div>
-
-      {/* Google Ads — always first */}
-      {adsMonthlyBudget > 0 && (
-        <div className="px-6 py-3 border-b border-border/50">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent" />
-              <span className="text-xs font-semibold text-accent">Google Ads Budget</span>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${adsIsRecurring ? "bg-accent-light text-accent" : "bg-amber-light text-amber"}`}>
-                {adsIsRecurring ? "monatlich" : "einmalig"}
-              </span>
-            </div>
-            <span className="text-xs font-mono font-semibold text-accent">{formatEuro(adsMonthlyBudget)}</span>
-          </div>
-        </div>
-      )}
 
       {/* Recurring items */}
       {recurring.length > 0 && (
