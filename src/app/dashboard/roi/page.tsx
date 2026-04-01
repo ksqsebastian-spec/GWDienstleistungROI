@@ -193,6 +193,12 @@ export default function ROIPage() {
           </h3>
           <div className="space-y-4">
             <ConfigField
+              label="Google Ads Budget / Monat"
+              value={config.google_ads_budget}
+              suffix="€"
+              onChange={(v) => updateConfig("google_ads_budget", v)}
+            />
+            <ConfigField
               label="Pflegekosten / Monat"
               value={config.pflegekosten_monat}
               suffix="€"
@@ -371,7 +377,7 @@ export default function ROIPage() {
               <div className="flex justify-between text-xs">
                 <span className="text-text-muted">Ø Google Ads / Monat</span>
                 <span className="font-mono text-red">
-                  {formatCurrency(87.75)}
+                  {formatCurrency(config.google_ads_budget)}
                 </span>
               </div>
               <div className="flex justify-between text-xs">

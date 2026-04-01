@@ -34,9 +34,7 @@ export function calculateMonthlyROI(jobs: Job[], config: Config): MonthlyROI[] {
     const rohertrag = monthJobs.reduce((s, j) => s + (j.rohertrag || 0), 0);
     const operativeMarge = rohertrag * config.operative_marge_pct;
 
-    // Google Ads spend: sum of jobs with Google Ads herkunft, approximated
-    // For simplicity, use a proportion of total costs or track separately
-    const adsAusgaben = i === 0 ? 87.75 : 0; // placeholder — will be from actual data
+    const adsAusgaben = config.google_ads_budget;
 
     const pflegekosten = config.pflegekosten_monat;
     const kostenGesamt = adsAusgaben + pflegekosten;
@@ -83,7 +81,7 @@ export function calculateBreakEven(jobs: Job[], config: Config) {
   const operativerErtragProAuftrag = avgRohertrag * config.operative_marge_pct;
   const operativerErtragProMonat = operativerErtragProAuftrag * config.avg_auftraege_monat;
 
-  const laufendeKosten = config.pflegekosten_monat + 87.75; // placeholder ads spend
+  const laufendeKosten = config.pflegekosten_monat + config.google_ads_budget;
   const ueberdeckung = operativerErtragProMonat - laufendeKosten;
 
   const einmalig = config.homepage_kosten + config.ads_setup_kosten;

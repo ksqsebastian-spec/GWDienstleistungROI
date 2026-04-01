@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS config (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   homepage_kosten NUMERIC NOT NULL DEFAULT 10000,
   ads_setup_kosten NUMERIC NOT NULL DEFAULT 2000,
+  google_ads_budget NUMERIC NOT NULL DEFAULT 87.75,
   pflegekosten_monat NUMERIC NOT NULL DEFAULT 50,
   operative_marge_pct NUMERIC NOT NULL DEFAULT 0.20,
   avg_auftraege_monat NUMERIC NOT NULL DEFAULT 5,
@@ -28,8 +29,11 @@ CREATE TABLE IF NOT EXISTS config (
 );
 
 -- Insert default config
-INSERT INTO config (homepage_kosten, ads_setup_kosten, pflegekosten_monat, operative_marge_pct, avg_auftraege_monat)
-VALUES (10000, 2000, 50, 0.20, 5);
+INSERT INTO config (homepage_kosten, ads_setup_kosten, google_ads_budget, pflegekosten_monat, operative_marge_pct, avg_auftraege_monat)
+VALUES (10000, 2000, 87.75, 50, 0.20, 5);
+
+-- Migration: run this if you already have the config table
+-- ALTER TABLE config ADD COLUMN IF NOT EXISTS google_ads_budget NUMERIC NOT NULL DEFAULT 87.75;
 
 -- Insert seed data from the xlsx
 INSERT INTO jobs (jahr, monat, kundenname, objektadresse, taetigkeit, herkunft, netto_umsatz, rohertrag, angebot, datum) VALUES

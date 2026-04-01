@@ -25,9 +25,11 @@ type ColumnMapping = Record<string, string>; // fileHeader → dbField
 function autoMapColumns(headers: string[]): ColumnMapping {
   const mapping: ColumnMapping = {};
   for (const header of headers) {
-    // Exact match against the known xlsx format first
-    if (XLSX_COLUMN_MAP[header]) {
-      mapping[header] = XLSX_COLUMN_MAP[header];
+    // Normalize Unicode to handle composed vs decomposed umlauts (ä, ö, ü)
+    const normalized = header.normalize("NFC");
+    const match = XLSX_COLUMN_MAP[header] || XLSX_COLUMN_MAP[normalized];
+    if (match) {
+      mapping[header] = match;
     }
   }
   return mapping;
@@ -72,7 +74,7 @@ function parseValue(
     return null;
   }
 
-  return String(raw).trim();
+  return String(raw).normalize("NFC").trim();
 }
 
 function isRowEmpty(row: RawRow, mapping: ColumnMapping): boolean {
