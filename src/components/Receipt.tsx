@@ -6,6 +6,7 @@ import { CartItem, Channel, CHANNELS, formatEuro } from "@/lib/flywheel-data";
 interface ReceiptProps {
   cart: CartItem[];
   adsMonthlyBudget: number;
+  adsPricing: "recurring" | "onetime";
   totalBudget: number;
 }
 
@@ -13,11 +14,12 @@ function getChannel(id: string): Channel | undefined {
   return CHANNELS.find((c) => c.id === id);
 }
 
-export default function Receipt({ cart, adsMonthlyBudget, totalBudget }: ReceiptProps) {
+export default function Receipt({ cart, adsMonthlyBudget, adsPricing, totalBudget }: ReceiptProps) {
   const recurring = cart.filter((i) => i.pricing === "recurring");
   const onetime = cart.filter((i) => i.pricing === "onetime");
-  const recurringTotal = recurring.reduce((s, i) => s + i.amount, 0) + adsMonthlyBudget;
-  const onetimeTotal = onetime.reduce((s, i) => s + i.amount, 0);
+  const adsIsRecurring = adsPricing === "recurring";
+  const recurringTotal = recurring.reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? adsMonthlyBudget : 0);
+  const onetimeTotal = onetime.reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? 0 : adsMonthlyBudget);
   const totalSpend = recurringTotal + onetimeTotal;
   const remaining = totalBudget - totalSpend;
 
@@ -25,7 +27,7 @@ export default function Receipt({ cart, adsMonthlyBudget, totalBudget }: Receipt
     const wb = XLSX.utils.book_new();
 
     const receiptRows = [
-      { Position: "GOOGLE ADS BUDGET (MONATLICH)", Typ: "Monatlich", "Betrag (€)": adsMonthlyBudget },
+      { Position: `GOOGLE ADS BUDGET (${adsIsRecurring ? "MONATLICH" : "EINMALIG"})`, Typ: adsIsRecurring ? "Monatlich" : "Einmalig", "Betrag (€)": adsMonthlyBudget },
       ...recurring.map((i) => ({
         Position: getChannel(i.channelId)?.nm || i.channelId,
         Typ: "Monatlich",
@@ -92,7 +94,9 @@ export default function Receipt({ cart, adsMonthlyBudget, totalBudget }: Receipt
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-accent" />
               <span className="text-xs font-semibold text-accent">Google Ads Budget</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-accent-light text-accent rounded-full">monatlich</span>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${adsIsRecurring ? "bg-accent-light text-accent" : "bg-amber-light text-amber"}`}>
+                {adsIsRecurring ? "monatlich" : "einmalig"}
+              </span>
             </div>
             <span className="text-xs font-mono font-semibold text-accent">{formatEuro(adsMonthlyBudget)}</span>
           </div>

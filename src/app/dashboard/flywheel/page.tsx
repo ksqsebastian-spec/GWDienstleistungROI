@@ -9,6 +9,7 @@ import Receipt from "@/components/Receipt";
 export default function FlywheelPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [adsMonthlyBudget, setAdsMonthlyBudget] = useState(87.75);
+  const [adsPricing, setAdsPricing] = useState<"recurring" | "onetime">("recurring");
   const [totalBudget, setTotalBudget] = useState(8000);
   const [loadedFromDB, setLoadedFromDB] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
@@ -71,8 +72,8 @@ export default function FlywheelPage() {
             channel_id: "google-ads",
             channel_name: "Google Ads Budget",
             amount: adsMonthlyBudget,
-            pricing: "recurring" as const,
-            note: "Monatliches Google Ads Werbebudget",
+            pricing: adsPricing,
+            note: adsPricing === "recurring" ? "Monatliches Google Ads Werbebudget" : "Einmaliges Google Ads Budget",
             purchased_at: now,
           }]
         : []),
@@ -99,12 +100,13 @@ export default function FlywheelPage() {
   };
 
   // Budget calculations
+  const adsIsRecurring = adsPricing === "recurring";
   const recurringSpend = cart
     .filter((i) => i.pricing === "recurring")
-    .reduce((s, i) => s + i.amount, 0) + adsMonthlyBudget;
+    .reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? adsMonthlyBudget : 0);
   const onetimeSpend = cart
     .filter((i) => i.pricing === "onetime")
-    .reduce((s, i) => s + i.amount, 0);
+    .reduce((s, i) => s + i.amount, 0) + (adsIsRecurring ? 0 : adsMonthlyBudget);
   const totalSpend = recurringSpend + onetimeSpend;
   const remaining = totalBudget - totalSpend;
   const spendPct = totalBudget > 0 ? Math.min(100, (totalSpend / totalBudget) * 100) : 0;
@@ -193,7 +195,7 @@ export default function FlywheelPage() {
               Generiert Kunden. Alle anderen Kanäle werden aus dem resultierenden Gewinn finanziert. ROAS typisch 3–6x.
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-right space-y-2">
             <div className="flex items-baseline gap-1">
               <span className="text-lg text-text-dim">€</span>
               <input
@@ -204,7 +206,28 @@ export default function FlywheelPage() {
                 step={10}
               />
             </div>
-            <p className="text-[10px] font-mono text-text-dim mt-1">pro Monat</p>
+            <div className="flex gap-1 justify-end">
+              <button
+                onClick={() => setAdsPricing("recurring")}
+                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors ${
+                  adsPricing === "recurring"
+                    ? "bg-blue text-white"
+                    : "bg-surface-2 text-text-dim hover:bg-surface-3"
+                }`}
+              >
+                monatlich
+              </button>
+              <button
+                onClick={() => setAdsPricing("onetime")}
+                className={`text-[9px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full transition-colors ${
+                  adsPricing === "onetime"
+                    ? "bg-amber text-white"
+                    : "bg-surface-2 text-text-dim hover:bg-surface-3"
+                }`}
+              >
+                einmalig
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -356,6 +379,7 @@ export default function FlywheelPage() {
             <Receipt
               cart={cart}
               adsMonthlyBudget={adsMonthlyBudget}
+              adsPricing={adsPricing}
               totalBudget={totalBudget}
             />
 
